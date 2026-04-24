@@ -18,4 +18,3 @@ public class Main {
         gamePanel.requestFocusInWindow(); // Request focus for the game panel to receive key inputs
     }
 }
-

@@ -14,7 +14,6 @@ public class KeyHandler implements KeyListener {
     public void keyPressed(KeyEvent e) {
         // This method is called when a key is pressed
             int code = e.getKeyCode(); // Get the code of the key that was pressed
-
             if (code == KeyEvent.VK_W) {
                 // Move up
                 upPressed = true;
@@ -32,6 +31,7 @@ public class KeyHandler implements KeyListener {
                 rightPressed = true;
             }
             if (code == KeyEvent.VK_SPACE) {
+                // Activate boost
                 boostPressed = true;
             }
     }
