@@ -30,7 +30,7 @@ public class KeyHandler implements KeyListener {
                 // Move right
                 rightPressed = true;
             }
-            if (code == KeyEvent.VK_SPACE) {
+            if (code == KeyEvent.VK_SHIFT) {
                 // Activate boost
                 boostPressed = true;
             }
@@ -56,7 +56,7 @@ public class KeyHandler implements KeyListener {
             // Stop moving right
             rightPressed = false;
         }
-        if (code == KeyEvent.VK_SPACE) {
+        if (code == KeyEvent.VK_SHIFT) {
             // Stop boosting
             boostPressed = false;
         }

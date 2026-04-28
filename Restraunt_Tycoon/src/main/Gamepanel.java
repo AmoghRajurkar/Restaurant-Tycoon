@@ -2,6 +2,7 @@ package main;
 import entity.Player;
 import java.awt.*;
 import javax.swing.*;
+import main.tile.TileManager;
 
 public class Gamepanel extends JPanel implements Runnable {
     // Screen tile settings
@@ -9,8 +10,8 @@ public class Gamepanel extends JPanel implements Runnable {
     public final int tileSize = orignalTileSize * 4;
 
     // 20 x 15 tiles set up
-    final int maxScreenCol = 20;
-    final int maxScreenRow = 15;
+    public final int maxScreenCol = 20;
+    public final int maxScreenRow = 15;
 
     final int screenWidth = tileSize * maxScreenCol; // 1280 pixels
     final int screenHeight = tileSize * maxScreenRow; // 960 pixels
@@ -21,6 +22,7 @@ public class Gamepanel extends JPanel implements Runnable {
 
     int FPS = 60; // Frames per second for the game loop
 
+     TileManager tileM = new TileManager(this); // Create an instance of the TileManager class to manage tile images and properties
     KeyHandler keyH = new KeyHandler(); // Key handler for handling keyboard input
     Thread gameThread; // Thread to run the game loop
     Player player = new Player(this, keyH); // Create a player instance and pass the Gamepanel and KeyHandler references
@@ -108,7 +110,7 @@ public class Gamepanel extends JPanel implements Runnable {
 
         // Label
         g2.setFont(new Font("Arial", Font.BOLD, 16));
-        String label = "SPACE = SPRINT";
+        String label = "SHIFT = SPRINT";
         FontMetrics fm = g2.getFontMetrics();
         int textX = x + (boostBarWidth - fm.stringWidth(label)) / 2;
         int textY = y + ((boostBarHeight - fm.getHeight()) / 2) + fm.getAscent();
@@ -120,6 +122,7 @@ public class Gamepanel extends JPanel implements Runnable {
         super.paintComponent(g); // Call the superclass method to ensure proper painting
         Graphics2D g2 = (Graphics2D) g; // Cast Graphics to Graphics2D for better control over rendering
         // Draw game elements here using g2
+        tileM.draw(g2); // Draw the tiles on the screen
         player.draw(g2); // Draw the player on the screen
         drawBoostBar(g2); // Draw the boost recharge bar in the top-right corner
         g2.dispose(); // Dispose of the graphics context to free up resources
