@@ -3,7 +3,7 @@ import java.awt.image.BufferedImage;
 
 // Superclass for all entities in the game, such as players, customers, and servers. This class can be extended to create specific types of entities with their own unique behaviors and attributes.
 public class Entity {
-    public int x, y; // Position of the entity on the screen
+    public int worldX, worldY; // Position of the entity in the game world
     public int speed; // Speed at which any entity moves
     // Placeholder for the entity's image, which can be used for rendering the entity on the screen
     public BufferedImage up1, up2, down1, down2, left1, left2, right1, right2 ;

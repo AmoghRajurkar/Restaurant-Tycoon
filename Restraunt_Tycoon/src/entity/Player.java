@@ -18,17 +18,23 @@ public class Player extends Entity {
     public final int maxBoostTimer = 30; // Frames boost lasts at 60 FPS
     public final int maxBoostReload = 60; // Frames to recharge boost at 60 FPS
     public int animationThreshold; // Variable to control the speed of the walking animation, which can be adjusted based on boost status
+    public final int screenX; // X position of the player on the screen, which can be used for rendering the player
+    public final int screenY; // Y position of the player on the screen, which can be used for rendering the player
 
     public Player(Gamepanel gp, KeyHandler keyH) {
         this.gp = gp; // Initialize the Gamepanel reference
         this.keyH = keyH; // Initialize the KeyHandler reference
+
+        screenX = gp.screenWidth / 2 - (gp.tileSize / 2); // Set the player's X position to the center of the screen
+        screenY = gp.screenHeight / 2 - (gp.tileSize / 2); // Set the player's Y position to the center of the screen
+
         setDefaultValues(); // Set the default values for the player's position and speed
         getPlayerImage(); // Load player images
     }
 
     private void setDefaultValues() {
-        x = 100; // Set the default X position of the player
-        y = 100; // Set the default Y position of the player
+        worldX = gp.tileSize * 30; // Set the default X position of the player
+        worldY = gp.tileSize * 22; // Set the default Y position of the player
         speed = 5; // Set the default speed of the player
         direction = "down"; // Set the default direction of the player
     }
@@ -41,19 +47,19 @@ public class Player extends Entity {
             isMoving = true;
 
             if (keyH.upPressed == true) {
-                y -= speed; // Move player up
+                worldY -= speed; // Move player up
                 direction = "up";
             }
             if (keyH.downPressed == true) {
-                y += speed; // Move player down
+                worldY += speed; // Move player down
                 direction = "down";
             }
             if (keyH.leftPressed == true) {
-                x -= speed; // Move player left
+                worldX -= speed; // Move player left
                 direction = "left";
             }
             if (keyH.rightPressed == true) {
-                x += speed; // Move player right
+                worldX += speed; // Move player right
                 direction = "right";
             }
 
@@ -166,7 +172,7 @@ public class Player extends Entity {
             }
         }
 
-        g2.drawImage(image, x, y, gp.tileSize, gp.tileSize, null); // Draw the player image at the current position with the specified tile size
+        g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null); // Draw the player image at the current position with the specified tile size
     }
 
     private void getPlayerImage() {

@@ -14,16 +14,13 @@ public class TileManager {
     Gamepanel gp;
     Tile[] tile;
     int mapTileNum[][];
-    int mapObjectNum[][]; // Layer for objects/stalls drawn on top
 
     public TileManager(Gamepanel gp) {
         this.gp = gp;
-        tile = new Tile[17]; // 17 types of tiles
-        mapTileNum = new int[gp.maxScreenCol][gp.maxScreenRow]; // 20 x 15 tiles
-        mapObjectNum = new int[gp.maxScreenCol][gp.maxScreenRow]; // Object layer initialized to 0 (empty)
+        tile = new Tile[11]; // 11 types of tiles
+        mapTileNum = new int[gp.maxWorldCol][gp.maxWorldRow]; // 60 x 45 tiles
         getTileImage(); // Load the tile images
-        loadMap("/res/maps/map1.txt"); // Load the map layout from a text file
-        loadObjectMap("/res/maps/map1_objects.txt"); // Load the object/stall layout from a text file
+        loadMap("/res/maps/worldmap1.txt"); // Load the map layout from a text file
     }
 
     private BufferedImage loadImage(String fileName) {
@@ -94,11 +91,11 @@ public class TileManager {
             }
             int col = 0;
             int row = 0;
-            while (col < gp.maxScreenCol && row < gp.maxScreenRow) {
+            while (col < gp.maxWorldCol && row < gp.maxWorldRow) {
                 String line = br.readLine();
                 if (line == null) 
                     break; // End of file
-                while (col < gp.maxScreenCol) {
+                while (col < gp.maxWorldCol) {
                     String numbers[] = line.split(" ");
                     if (col < numbers.length) {
                         int num = Integer.parseInt(numbers[col]);
@@ -106,93 +103,44 @@ public class TileManager {
                     }
                     col++;
                 }
-                if (col == gp.maxScreenCol) {
+                if (col == gp.maxWorldCol) {
                     col = 0;
                     row++;
                 }
             }
+            System.out.println(mapTileNum[0][0]);
             br.close();
         } catch (IOException e) {
             System.err.println("Error reading map file '" + filePath + "': " + e.getMessage());
         }
     }
 
-    private void loadObjectMap(String filePath) {
-        try {
-            InputStream is = getClass().getResourceAsStream(filePath);
-            BufferedReader br;
-            if (is != null) {
-                br = new BufferedReader(new InputStreamReader(is));
-            } else {
-                // Fallback to file system reading
-                br = new BufferedReader(new java.io.FileReader(filePath.substring(1))); // Remove leading "/"
-            }
-            int col = 0;
-            int row = 0;
-            while (col < gp.maxScreenCol && row < gp.maxScreenRow) {
-                String line = br.readLine();
-                if (line == null) 
-                    break; // End of file
-                while (col < gp.maxScreenCol) {
-                    String numbers[] = line.split(" ");
-                    if (col < numbers.length) {
-                        int num = Integer.parseInt(numbers[col]);
-                        mapObjectNum[col][row] = num;
-                    }
-                    col++;
-                }
-                if (col == gp.maxScreenCol) {
-                    col = 0;
-                    row++;
-                }
-            }
-            br.close();
-        } catch (IOException e) {
-            // Object map file is optional - if it doesn't exist, all values stay at 0 (empty)
-            System.out.println("Object map file '" + filePath + "' not found. Using empty object layer.");
-        }
-    }
-
     public void draw(Graphics2D g2) {
-        // Draw background tiles first
-        int col = 0;
-        int row = 0;
-        int x = 0;
-        int y = 0;
+        // Draw the tiles on the scree
+        int worldCol = 0;
+        int worldRow = 0;
 
-        while (col < gp.maxScreenCol && row < gp.maxScreenRow) {
-            int tileNum = mapTileNum[col][row];
-            g2.drawImage(tile[tileNum].image, x, y, gp.tileSize, gp.tileSize, null);
-            col++;
-            x += gp.tileSize;
-            
-            if (col == gp.maxScreenCol) {
-                col = 0;
-                x = 0;
-                row++;
-                y += gp.tileSize;
+        while  (worldCol < gp.maxWorldCol && worldRow < gp.maxWorldRow) {
+            int tileNum = mapTileNum[worldCol][worldRow];
+
+            // Calculate the world and screen coordinates for the current tile
+            int worldX = worldCol * gp.tileSize;
+            int worldY = worldRow * gp.tileSize;
+            int screenX = worldX - gp.player.worldX + gp.player.screenX;
+            int screenY = worldY - gp.player.worldY + gp.player.screenY;
+
+            // Only draw the tile if it's within the visible screen area to optimize rendering
+            if(worldX + gp.tileSize > gp.player.worldX - gp.player.screenX &&
+               worldX - gp.tileSize < gp.player.worldX + gp.player.screenX &&
+               worldY + gp.tileSize > gp.player.worldY - gp.player.screenY &&
+               worldY - gp.tileSize < gp.player.worldY + gp.player.screenY) {
+                g2.drawImage(tile[tileNum].image, screenX, screenY, gp.tileSize, gp.tileSize, null);
             }
-        }
-
-        // Draw objects/stalls on top of the background
-        col = 0;
-        row = 0;
-        x = 0;
-        y = 0;
-
-        while (col < gp.maxScreenCol && row < gp.maxScreenRow) {
-            int objectNum = mapObjectNum[col][row];
-            if (objectNum != 0) { // 0 means no object
-                g2.drawImage(tile[objectNum].image, x, y, gp.tileSize, gp.tileSize, null);
-            }
-            col++;
-            x += gp.tileSize;
+            worldCol++;
             
-            if (col == gp.maxScreenCol) {
-                col = 0;
-                x = 0;
-                row++;
-                y += gp.tileSize;
+            if (worldCol == gp.maxWorldCol) {
+                worldCol = 0;
+                worldRow++;
             }
         }
     }
