@@ -89,7 +89,6 @@ public class Gamepanel extends JPanel implements Runnable {
 
     public void update() {
         player.update(); // Update the player's state, including movement and boost logic
-        System.out.println("Player World Coordinates: (" + player.worldX/tileSize + ", " + player.worldY/tileSize + ")"); // Debugging output to track player position in the world  
     }
 
     private void drawBoostBar(Graphics2D g2) {
