@@ -4,11 +4,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
+import main.CollisionChecker;
 import main.Gamepanel;
 import main.KeyHandler;
 
 public class Player extends Entity {
-    GamePanel gp;
+    Gamepanel gp; // Reference to the Gamepanel, which can be used to access game-related properties and methods
     KeyHandler keyH; // Reference to the KeyHandler, which can be used to check the state of key presses
     public boolean boostActive = false; // Indicates whether the boost is currently active
     public int boostTimer = 0; // Timer to track the duration of the boost
@@ -19,6 +20,8 @@ public class Player extends Entity {
     public int animationThreshold; // Variable to control the speed of the walking animation, which can be adjusted based on boost status
     public final int screenX; // X position of the player on the screen, which can be used for rendering the player
     public final int screenY; // Y position of the player on the screen, which can be used for rendering the player
+    public int roomX;
+    public int roomY;
 
     public Player(Gamepanel gp, KeyHandler keyH) {
         this.gp = gp; // Initialize the Gamepanel reference
@@ -39,6 +42,8 @@ public class Player extends Entity {
     private void setDefaultValues() {
         worldX = gp.tileSize * 30; // Set the default X position of the player
         worldY = gp.tileSize * 22; // Set the default Y position of the player
+        roomX = 400;
+        roomY = 500;
         speed = 5; // Set the default speed of the player
         direction = "down"; // Set the default direction of the player
     }
@@ -46,6 +51,13 @@ public class Player extends Entity {
     public void update() {
         // Update game state logic
         isMoving = false;
+
+        if(keyH.interactPressed &&
+        gp.gameState.equals(gp.WORLD_STATE) &&
+        !CollisionChecker.lastContactStall.equals("")) {
+            enterStall();
+            keyH.interactPressed = false;
+        }
 
         if (keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true || keyH.rightPressed == true) {
             isMoving = true;
@@ -63,29 +75,44 @@ public class Player extends Entity {
                 direction = "right";
             }
 
-            // Check for collisions with tiles
-            collisionOn = false; // Reset collision flag before checking for collisions
-            gp.cChecker.checkTile(this); // Check for collisions with tiles
+            collisionOn = false;
+            if(gp.gameState.equals(gp.WORLD_STATE)) {
+                gp.cChecker.checkTile(this);
+            }
+
+            // Check world boundary — stop the player when the edge of the map would come into view
+            if (direction.equals("up") && worldY - screenY <= 0) {
+                collisionOn = true;
+            }
+            if (direction.equals("down") && worldY + screenY + gp.tileSize >= gp.worldHeight) {
+                collisionOn = true;
+            }
+            if (direction.equals("left") && worldX - screenX <= 0) {
+                collisionOn = true;
+            }
+            if (direction.equals("right") && worldX + screenX + gp.tileSize >= gp.worldWidth) {
+                collisionOn = true;
+            }
 
             // If collision is fasle, player can move
             if (collisionOn == false) {
-                switch (direction) {
-                    case "up" -> {
-                    worldY -= speed; // Move player up
-                    break;
+                if(gp.gameState.equals(gp.WORLD_STATE)) {
+                    switch (direction) {
+                        case "up" -> worldY -= speed;
+                        case "down" -> worldY += speed;
+                        case "left" -> worldX -= speed;
+                        case "right" -> worldX += speed;
                     }
-                    case "down" -> {
-                        worldY += speed; // Move player down
-                        break;
+                } else if(gp.gameState.equals(gp.STALL_STATE)) {
+                    if (!gp.cChecker.checkStallTile(roomX, roomY, direction, speed)) {
+                        switch (direction) {
+                            case "up" -> roomY -= speed;
+                            case "down" -> roomY += speed;
+                            case "left" -> roomX -= speed;
+                            case "right" -> roomX += speed;
+                        }
                     }
-                    case "left" -> {
-                        worldX -= speed; // Move player left
-                        break;
-                    }
-                    case "right" -> {
-                        worldX += speed; // Move player right
-                        break;
-                    }
+
                 }
             }
 
@@ -140,7 +167,25 @@ public class Player extends Entity {
             speed = 5;
         }
 
-        System.out.println("Player TileX: " + worldX / gp.tileSize + ", TileY: " + worldY / gp.tileSize);
+        if(gp.gameState.equals(gp.STALL_STATE)) {
+            // Exit zone matches the door drawn in TileManager — bottom-right, one tile from each wall
+            Rectangle exitZone = new Rectangle(
+                    gp.tileM.doorX,
+                    gp.tileM.doorY,
+                    gp.tileSize,
+                    gp.tileSize
+            );
+            Rectangle playerBox = new Rectangle(
+                    roomX,
+                    roomY,
+                    gp.tileSize,
+                    gp.tileSize
+            );
+
+            if(playerBox.intersects(exitZone)) {
+                exitStall();
+            }
+        }
     }
 
     public float getBoostChargeRatio() {
@@ -152,6 +197,20 @@ public class Player extends Entity {
 
     public boolean isBoostReady() {
         return !boostActive && !boostReloading;
+    }
+
+    public void enterStall() {
+        gp.gameState = gp.STALL_STATE;
+        gp.tileM.loadStallInsides();
+        roomX = gp.screenWidth / 2 - gp.tileSize / 2;
+        roomY = gp.screenHeight - 350;
+        gp.repaint();
+    }
+
+    public void exitStall() {
+        gp.gameState = gp.WORLD_STATE;
+        CollisionChecker.lastContactStall = "";
+        gp.repaint();
     }
 
     public void draw(Graphics2D g2) {
@@ -199,7 +258,13 @@ public class Player extends Entity {
             }
         }
 
-        g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null); // Draw the player image at the current position with the specified tile size
+        if(gp.gameState.equals(gp.WORLD_STATE)) {
+            g2.drawImage(image, screenX, screenY,
+                    gp.tileSize, gp.tileSize, null);
+        } else {
+            g2.drawImage(image, roomX, roomY,
+                    gp.tileSize, gp.tileSize, null);
+        }
     }
 
     private void getPlayerImage() {

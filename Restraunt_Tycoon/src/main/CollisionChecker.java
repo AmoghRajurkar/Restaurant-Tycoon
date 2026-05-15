@@ -3,115 +3,162 @@ import entity.Entity;
 
 public class CollisionChecker {
     Gamepanel gp;
+    public static String contactStall = "";
+    public static String lastContactStall = "";
 
     public CollisionChecker(Gamepanel gp) {
         this.gp = gp;
     }
 
     public void checkTile(Entity entity) {
-        // Calculate the edges of the entity's solid area in world coordinates
-        int entityLeftWorldX = entity.worldX + entity.solidArea.x; // Calculate the left edge of the entity's solid area in world coordinates
-        int entityRightWorldX = entity.worldX + entity.solidArea.x + entity.solidArea.width; // Calculate the right edge of the entity's solid area in world coordinates
-        int entityTopWorldY = entity.worldY + entity.solidArea.y; // Calculate the top edge of the entity's solid area in world coordinates
-        int entityBottomWorldY = entity.worldY + entity.solidArea.y + entity.solidArea.height; // Calculate the bottom edge of the entity's solid area in world coordinates
+        int entityLeftWorldX = entity.worldX + entity.solidArea.x;
+        int entityRightWorldX = entity.worldX + entity.solidArea.x + entity.solidArea.width;
+        int entityTopWorldY = entity.worldY + entity.solidArea.y;
+        int entityBottomWorldY = entity.worldY + entity.solidArea.y + entity.solidArea.height;
 
-        int entityLeftCol = entityLeftWorldX / gp.tileSize; // Determine which tile column the left edge of the solid area is in
-        int entityRightCol = entityRightWorldX / gp.tileSize; // Determine which tile column the right edge of the solid area is in
-        int entityTopRow = entityTopWorldY / gp.tileSize; // Determine which tile row the top edge of the solid area is in
-        int entityBottomRow = entityBottomWorldY / gp.tileSize; // Determine which tile row the bottom edge of the solid area is in
+        int entityLeftCol = entityLeftWorldX / gp.tileSize;
+        int entityRightCol = entityRightWorldX / gp.tileSize;
+        int entityTopRow = entityTopWorldY / gp.tileSize;
+        int entityBottomRow = entityBottomWorldY / gp.tileSize;
 
-        // Stalls are 4x4 tiles, so we need to check the stall layer separately
-        int stallLeftWorldX = entity.worldX + entity.solidArea.x; // Calculate the left edge of the entity's solid area in world coordinates (same as tile layer)
-        int stallRightWorldX = entity.worldX + entity.solidArea.x + entity.solidArea.width; // Calculate the right edge of the entity's solid area in world coordinates (same as tile layer)
-        int stallTopWorldY = entity.worldY + entity.solidArea.y; // Calculate the top edge of the entity's solid area in world coordinates (same as tile layer)
-        int stallBottomWorldY = entity.worldY + entity.solidArea.y + entity.solidArea.height; // Calculate the bottom edge of the entity's solid area in world coordinates (same as tile layer)
+        int stallLeftCol = entityLeftWorldX / gp.stallTileSize;
+        int stallRightCol = entityRightWorldX / gp.stallTileSize;
+        int stallTopRow = entityTopWorldY / gp.stallTileSize;
+        int stallBottomRow = entityBottomWorldY / gp.stallTileSize;
+        int tileNum1, tileNum2;
 
-        int stallLeftCol = stallLeftWorldX / gp.stallTileSize; // Determine which stall column the left edge of the solid area is in
-        int stallRightCol = stallRightWorldX / gp.stallTileSize; // Determine which stall column the right edge of the solid area is in
-        int stallTopRow = stallTopWorldY / gp.stallTileSize; // Determine which stall row the top edge of the solid area is in
-        int stallBottomRow = stallBottomWorldY / gp.stallTileSize; // Determine which stall row the bottom edge of the solid area is in
-        int tileNum1, tileNum2; // Variables to hold the tile numbers for collision checking
+        // Reset contactStall each frame — will be re-set if actively colliding
+        contactStall = "";
+        lastContactStall = "";
 
-        // Check collision with stall layer first since it's on top of the tile layer
+        // Check stall layer
         switch (entity.direction) {
             case "up" -> {
-                entityTopRow = (stallTopWorldY - entity.speed) / gp.stallTileSize; // Calculate the new top row if the entity moves up
-                tileNum1 = gp.tileM.stallTileNum[stallLeftCol][stallTopRow]; // Get the tile number for the left edge of the solid area 
-                tileNum2 = gp.tileM.stallTileNum[stallRightCol][stallTopRow]; // Get the tile number for the right edge of the solid area
-                if (gp.tileM.tile[tileNum1].collision == true || gp.tileM.tile[tileNum2].collision == true) {
-                    entity.collisionOn = true; // Set collision flag if either tile has collision properties
-                    checkStall(entity);
+                stallTopRow = (entityTopWorldY - entity.speed) / gp.stallTileSize;
+                tileNum1 = gp.tileM.stallTileNum[stallLeftCol][stallTopRow];
+                tileNum2 = gp.tileM.stallTileNum[stallRightCol][stallTopRow];
+                if (gp.tileM.tile[tileNum1].collision || gp.tileM.tile[tileNum2].collision) {
+                    contactStall = getStallName(tileNum1 != 0 ? tileNum1 : tileNum2);
+                    lastContactStall = contactStall;
                 }
             }
             case "down" -> {
-                entityBottomRow = (stallBottomWorldY + entity.speed) / gp.stallTileSize; // Calculate the new bottom row if the entity moves down
-                tileNum1 = gp.tileM.stallTileNum[stallLeftCol][stallBottomRow]; // Get the tile number for the left edge of the solid area 
-                tileNum2 = gp.tileM.stallTileNum[stallRightCol][stallBottomRow]; // Get the tile number for the right edge of the solid area
-                if (gp.tileM.tile[tileNum1].collision == true || gp.tileM.tile[tileNum2].collision == true) {
-                    entity.collisionOn = true; // Set collision flag if either tile has collision properties
-                    checkStall(entity);
+                stallBottomRow = (entityBottomWorldY + entity.speed) / gp.stallTileSize;
+                tileNum1 = gp.tileM.stallTileNum[stallLeftCol][stallBottomRow];
+                tileNum2 = gp.tileM.stallTileNum[stallRightCol][stallBottomRow];
+                if (gp.tileM.tile[tileNum1].collision || gp.tileM.tile[tileNum2].collision) {
+                    contactStall = getStallName(tileNum1 != 0 ? tileNum1 : tileNum2);
+                    lastContactStall = contactStall;
                 }
             }
             case "left" -> {
-                entityLeftCol = (stallLeftWorldX - entity.speed) / gp.stallTileSize; // Calculate the new left column if the entity moves left
-                tileNum1 = gp.tileM.stallTileNum[stallLeftCol][stallTopRow]; // Get the tile number for the left edge of the solid area
-                tileNum2 = gp.tileM.stallTileNum[stallLeftCol][stallBottomRow]; // Get the tile number for the right edge of the solid area
-                if (gp.tileM.tile[tileNum1].collision == true || gp.tileM.tile[tileNum2].collision == true) {
-                    entity.collisionOn = true; // Set collision flag if either tile has collision properties
-                    checkStall(entity);
+                stallLeftCol = (entityLeftWorldX - entity.speed) / gp.stallTileSize;
+                tileNum1 = gp.tileM.stallTileNum[stallLeftCol][stallTopRow];
+                tileNum2 = gp.tileM.stallTileNum[stallLeftCol][stallBottomRow];
+                if (gp.tileM.tile[tileNum1].collision || gp.tileM.tile[tileNum2].collision) {
+                    contactStall = getStallName(tileNum1 != 0 ? tileNum1 : tileNum2);
+                    lastContactStall = contactStall;
                 }
             }
             case "right" -> {
-                entityRightCol = (stallRightWorldX + entity.speed) / gp.stallTileSize; // Calculate the new right column if the entity moves right
-                tileNum1 = gp.tileM.stallTileNum[stallRightCol][stallTopRow]; // Get the tile number for the left edge of the solid area
-                tileNum2 = gp.tileM.stallTileNum[stallRightCol][stallBottomRow]; // Get the tile number for the right edge of the solid area
-                if (gp.tileM.tile[tileNum1].collision == true || gp.tileM.tile[tileNum2].collision == true) {
-                    entity.collisionOn = true; // Set collision flag if either tile has collision properties
-                    checkStall(entity);
+                stallRightCol = (entityRightWorldX + entity.speed) / gp.stallTileSize;
+                tileNum1 = gp.tileM.stallTileNum[stallRightCol][stallTopRow];
+                tileNum2 = gp.tileM.stallTileNum[stallRightCol][stallBottomRow];
+                if (gp.tileM.tile[tileNum1].collision || gp.tileM.tile[tileNum2].collision) {
+                    contactStall = getStallName(tileNum1 != 0 ? tileNum1 : tileNum2);
+                    lastContactStall = contactStall;
                 }
             }
         }
 
-        // If no collision with stall layer, check tile layer
+        // Check tile layer
         switch (entity.direction) {
             case "up" -> {
-                entityTopRow = (entityTopWorldY - entity.speed) / gp.tileSize; // Calculate the new top row if the entity moves up
-                tileNum1 = gp.tileM.mapTileNum[entityLeftCol][entityTopRow]; // Get the tile number for the left edge of the solid area 
-                tileNum2 = gp.tileM.mapTileNum[entityRightCol][entityTopRow]; // Get the tile number for the right edge of the solid area
-                if (gp.tileM.tile[tileNum1].collision == true || gp.tileM.tile[tileNum2].collision == true) {
-                    entity.collisionOn = true; // Set collision flag if either tile has collision properties
-                }
+                entityTopRow = (entityTopWorldY - entity.speed) / gp.tileSize;
+                tileNum1 = gp.tileM.mapTileNum[entityLeftCol][entityTopRow];
+                tileNum2 = gp.tileM.mapTileNum[entityRightCol][entityTopRow];
+                if (gp.tileM.tile[tileNum1].collision || gp.tileM.tile[tileNum2].collision)
+                    entity.collisionOn = true;
             }
             case "down" -> {
-                entityBottomRow = (entityBottomWorldY + entity.speed) / gp.tileSize; // Calculate the new bottom row if the entity moves down
-                tileNum1 = gp.tileM.mapTileNum[entityLeftCol][entityBottomRow]; // Get the tile number for the left edge of the solid area 
-                tileNum2 = gp.tileM.mapTileNum[entityRightCol][entityBottomRow]; // Get the tile number for the right edge of the solid area
-                if (gp.tileM.tile[tileNum1].collision == true || gp.tileM.tile[tileNum2].collision == true) {
-                    entity.collisionOn = true; // Set collision flag if either tile has collision properties
-                }
+                entityBottomRow = (entityBottomWorldY + entity.speed) / gp.tileSize;
+                tileNum1 = gp.tileM.mapTileNum[entityLeftCol][entityBottomRow];
+                tileNum2 = gp.tileM.mapTileNum[entityRightCol][entityBottomRow];
+                if (gp.tileM.tile[tileNum1].collision || gp.tileM.tile[tileNum2].collision)
+                    entity.collisionOn = true;
             }
             case "left" -> {
-                entityLeftCol = (entityLeftWorldX - entity.speed) / gp.tileSize; // Calculate the new left column if the entity moves left
-                tileNum1 = gp.tileM.mapTileNum[entityLeftCol][entityTopRow]; // Get the tile number for the left edge of the solid area
-                tileNum2 = gp.tileM.mapTileNum[entityLeftCol][entityBottomRow]; // Get the tile number for the right edge of the solid area
-                if (gp.tileM.tile[tileNum1].collision == true || gp.tileM.tile[tileNum2].collision == true) {
-                    entity.collisionOn = true; // Set collision flag if either tile has collision properties
-                }
+                entityLeftCol = (entityLeftWorldX - entity.speed) / gp.tileSize;
+                tileNum1 = gp.tileM.mapTileNum[entityLeftCol][entityTopRow];
+                tileNum2 = gp.tileM.mapTileNum[entityLeftCol][entityBottomRow];
+                if (gp.tileM.tile[tileNum1].collision || gp.tileM.tile[tileNum2].collision)
+                    entity.collisionOn = true;
             }
             case "right" -> {
-                entityRightCol = (entityRightWorldX + entity.speed) / gp.tileSize; // Calculate the new right column if the entity moves right
-                tileNum1 = gp.tileM.mapTileNum[entityRightCol][entityTopRow]; // Get the tile number for the left edge of the solid area
-                tileNum2 = gp.tileM.mapTileNum[entityRightCol][entityBottomRow]; // Get the tile number for the right edge of the solid area
-                if (gp.tileM.tile[tileNum1].collision == true || gp.tileM.tile[tileNum2].collision == true) {
-                    entity.collisionOn = true; // Set collision flag if either tile has collision properties
-                }
+                entityRightCol = (entityRightWorldX + entity.speed) / gp.tileSize;
+                tileNum1 = gp.tileM.mapTileNum[entityRightCol][entityTopRow];
+                tileNum2 = gp.tileM.mapTileNum[entityRightCol][entityBottomRow];
+                if (gp.tileM.tile[tileNum1].collision || gp.tileM.tile[tileNum2].collision)
+                    entity.collisionOn = true;
             }
         }
     }
 
-    public void checkStall(Entity entity) {
-        System.out.println("Checking stall collision for entity at worldX: " + entity.worldX + ", worldY: " + entity.worldY);
-        System.out.println("Entity direction: " + entity.direction);
+    public boolean checkStallTile(int roomX, int roomY, String direction, int speed) {
+        int left   = roomX + gp.player.solidArea.x;
+        int right  = roomX + gp.player.solidArea.x + gp.player.solidArea.width;
+        int top    = roomY + gp.player.solidArea.y;
+        int bottom = roomY + gp.player.solidArea.y + gp.player.solidArea.height;
+
+        int leftCol, rightCol, topRow, bottomRow;
+
+        switch (direction) {
+            case "up" -> {
+                topRow   = (top - speed) / gp.tileSize;
+                leftCol  = left  / gp.tileSize;
+                rightCol = right / gp.tileSize;
+                if (topRow < 0) return true;
+                int t1 = gp.tileM.getCurrentStallMap()[leftCol][topRow];
+                int t2 = gp.tileM.getCurrentStallMap()[rightCol][topRow];
+                if (gp.tileM.tile[t1].collision || gp.tileM.tile[t2].collision) return true;
+            }
+            case "down" -> {
+                bottomRow = (bottom + speed) / gp.tileSize;
+                leftCol   = left  / gp.tileSize;
+                rightCol  = right / gp.tileSize;
+                if (bottomRow >= 15) return true;
+                int t1 = gp.tileM.getCurrentStallMap()[leftCol][bottomRow];
+                int t2 = gp.tileM.getCurrentStallMap()[rightCol][bottomRow];
+                if (gp.tileM.tile[t1].collision || gp.tileM.tile[t2].collision) return true;
+            }
+            case "left" -> {
+                leftCol  = (left - speed) / gp.tileSize;
+                topRow   = top    / gp.tileSize;
+                bottomRow= bottom / gp.tileSize;
+                if (leftCol < 0) return true;
+                int t1 = gp.tileM.getCurrentStallMap()[leftCol][topRow];
+                int t2 = gp.tileM.getCurrentStallMap()[leftCol][bottomRow];
+                if (gp.tileM.tile[t1].collision || gp.tileM.tile[t2].collision) return true;
+            }
+            case "right" -> {
+                rightCol = (right + speed) / gp.tileSize;
+                topRow   = top    / gp.tileSize;
+                bottomRow= bottom / gp.tileSize;
+                if (rightCol >= 20) return true;
+                int t1 = gp.tileM.getCurrentStallMap()[rightCol][topRow];
+                int t2 = gp.tileM.getCurrentStallMap()[rightCol][bottomRow];
+                if (gp.tileM.tile[t1].collision || gp.tileM.tile[t2].collision) return true;
+            }
+        }
+        return false;
     }
 
+    private String getStallName(int tileNum) {
+        return switch (tileNum) {
+            case 8  -> "Red";
+            case 9  -> "Blue";
+            case 10 -> "Green";
+            default -> "";
+        };
+    }
 }

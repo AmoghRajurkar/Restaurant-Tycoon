@@ -14,5 +14,4 @@ public class Entity {
     public int SpriteNum = 1; // Variable to track which sprite image to use for animation (e.g., 1 or 2 for a simple two-frame animation)
     public Rectangle solidArea; // Rectangle representing the solid area of the entity for collision detection
     public boolean collisionOn = false; // Flag to indicate whether a collision is currently occurring for the entity
-
 }

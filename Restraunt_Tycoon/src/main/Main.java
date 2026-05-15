@@ -13,7 +13,7 @@ public class Main {
         window.add(gamePanel); // Add the GamePanel to the window
         window.pack(); // Adjust the window size to fit the preferred size of its components
         window.setVisible(true); // Make the window visible
-        gamePanel.startGameThread(); // Start the game thread to run the game loop
+        gamePanel.startGameThread(); // Start the game thread to run the game loops
         gamePanel.requestFocusInWindow(); // Request focus for the game panel to receive key inputsd
     }
 }
