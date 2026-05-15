@@ -32,7 +32,7 @@ public class Gamepanel extends JPanel implements Runnable {
     
     // Customer array
     public Customer[] customers;
-    private final int NUM_CUSTOMERS = 5; // Number of customers to spawn
+    private final int NUM_CUSTOMERS = 1; // Number of customers to spawn
 
     // World settings
     public final int maxWorldCol = 60;
@@ -56,8 +56,8 @@ public class Gamepanel extends JPanel implements Runnable {
         customers = new Customer[NUM_CUSTOMERS];
         for (int i = 0; i < NUM_CUSTOMERS; i++) {
             // Spawn customers at random positions in the world
-            int randomX = tileSize + tileSize * 5;
-            int randomY =  tileSize + tileSize * 5;
+            int randomX = tileSize + tileSize * 20;
+            int randomY =  tileSize + tileSize * 34;
             customers[i] = new Customer(this, randomX, randomY);
         }
     }
