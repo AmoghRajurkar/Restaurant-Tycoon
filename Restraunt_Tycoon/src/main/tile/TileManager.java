@@ -40,7 +40,7 @@ public class TileManager {
 
     public TileManager(Gamepanel gp) {
         this.gp = gp;
-        tile = new Tile[25];
+        tile = new Tile[26];
         mapTileNum = new int[gp.maxWorldCol][gp.maxWorldRow];
 
         stallTileSize = gp.tileSize * 4;
@@ -86,7 +86,7 @@ public class TileManager {
         tile[1].collision = true;
 
         tile[2] = new Tile();
-        tile[2].image = loadImage("res/tiles/Stall_wall.png");
+        tile[2].image = loadImage("res/tiles/stall_wall.png");
         tile[2].collision = true;
 
         tile[3] = new Tile();
@@ -155,20 +155,23 @@ public class TileManager {
         tile[19].collision = true;
 
         tile[20] = new Tile();
-        tile[20].image = loadImage("res/food/burger.png");
+        tile[20].image = loadImage("res/food/Burger_on_table.png");
 
         tile[21] = new Tile();
-        tile[21].image = loadImage("res/food/fries.png");
+        tile[21].image = loadImage("res/food/Fries_on_table.png");
 
         tile[22] = new Tile();
-        tile[22].image = loadImage("res/food/icecream.png");
+        tile[22].image = loadImage("res/food/Ice_cream_on_table.png");
 
         tile[23] = new Tile();
-        tile[23].image = loadImage("res/food/soda.png");
+        tile[23].image = loadImage("res/food/Soda_on_table.png");
 
         tile[24] = new Tile();
         tile[24].image = loadImage("res/tiles/stall_table.png");
         tile[24].collision = true;
+
+        tile[25] = new Tile();
+        tile[25].image = loadImage("res/food/Milkshake_on_table.png");
     }
 
     private void loadMap(String filePath) {
