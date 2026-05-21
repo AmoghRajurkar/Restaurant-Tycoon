@@ -24,7 +24,7 @@ public class Gamepanel extends JPanel implements Runnable {
 
     int FPS = 60; // Frames per second for the game loop
 
-    TileManager tileM = new TileManager(this); // Create an instance of the TileManager class to manage tile images and properties
+    public TileManager tileM = new TileManager(this); // Create an instance of the TileManager class to manage tile images and properties
     KeyHandler keyH = new KeyHandler(); // Key handler for handling keyboard input
     Thread gameThread; // Thread to run the game loop
     public CollisionChecker cChecker = new CollisionChecker(this); // Create an instance of the CollisionChecker class to handle collision detection
@@ -43,6 +43,10 @@ public class Gamepanel extends JPanel implements Runnable {
     public final int maxWorldRow = 45;
     public final int worldWidth = tileSize * maxWorldCol; // Total width of the game world in pixels
     public final int worldHeight = tileSize * maxWorldRow; // Total height of the game world in pixels
+
+    public String gameState = "WORLD";
+    public final String WORLD_STATE = "WORLD";
+    public final String STALL_STATE = "STALL";
 
     // Constructor that allows us to set up the game panel
     public Gamepanel(){
@@ -77,19 +81,12 @@ public class Gamepanel extends JPanel implements Runnable {
         double delta = 0; // Variable to track the time difference for frame updates
         long lastTime = System.nanoTime();
         long currentTime;
-        // FPS check
-        //long timer = 0; 
-        //int drawCount = 0;
 
         // Game loop logic
         while (gameThread != null) {
             // Calculate the time difference and update the game state at the specified FPS
             currentTime = System.nanoTime();
             delta += (currentTime - lastTime) / drawInterval;
-            // FPS check
-            //long timer = 0; 
-            //int drawCount = 0;
-            //timer += currentTime - lastTime;
             lastTime = currentTime;
 
             // If enough time has passed (delta >= 1), update the game state and repaint the screen
@@ -97,16 +94,8 @@ public class Gamepanel extends JPanel implements Runnable {
                 update(); // Update game state
                 repaint(); // Request a repaint to update the screen
                 delta--;
-                // drawCount++; FPS check - Increment the draw count for FPS calculation
             }
 
-            // FPS check - Print the actual FPS every second for debugging purposes
-            /*if (timer >= 1000000000) {
-                // Print the actual FPS every second for debugging purposes
-                System.out.println("FPS: " + drawCount);
-                drawCount = 0; // Reset the draw count for the next second
-                timer = 0; // Reset the timer for the next second
-            }*/
         }
     }
     
@@ -162,14 +151,17 @@ public class Gamepanel extends JPanel implements Runnable {
     public void paintComponent(Graphics g) {
         super.paintComponent(g); // Call the superclass method to ensure proper painting
         Graphics2D g2 = (Graphics2D) g; // Cast Graphics to Graphics2D for better control over rendering
-        // Draw game elements here using g2
-        tileM.draw(g2); // Draw the tiles on the screen
-        
-        // Draw all customers
-        for (int i = 0; i < customersIndex; i++) {
-            customers[i].draw(g2);
+       
+        if(gameState.equals(WORLD_STATE)) {
+            tileM.draw(g2);
+            // Draw all customers
+            for (int i = 0; i < customersIndex; i++) {
+                customers[i].draw(g2);
+            }
+        } else if(gameState.equals(STALL_STATE)) {
+            tileM.drawStallInterior(g2);
         }
-        
+
         player.draw(g2); // Draw the player on the screen
         drawBoostBar(g2); // Draw the boost recharge bar in the top-right corner
         g2.dispose(); // Dispose of the graphics context to free up resources

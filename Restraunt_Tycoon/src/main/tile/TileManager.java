@@ -1,4 +1,5 @@
 package main.tile;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -21,21 +22,43 @@ public class TileManager {
     int stallMapRow;
     private String lastHandledStall = "";
 
+    // Interior map dimensions — 20 cols x 15 rows, fits the screen perfectly
+    private final int interiorCols = 20;
+    private final int interiorRows = 15;
+
+    // One 2D array per stall, loaded once at startup
+    private final int[][] redStallMap   = new int[interiorCols][interiorRows];
+    private final int[][] blueStallMap  = new int[interiorCols][interiorRows];
+    private final int[][] greenStallMap = new int[interiorCols][interiorRows];
+
+    // Points to whichever stall the player just entered
+    private int[][] currentStallMap = null;
+
+    // Door position — bottom-right corner, one tileSize away from each wall
+    public int doorX;
+    public int doorY;
+
     public TileManager(Gamepanel gp) {
         this.gp = gp;
         tile = new Tile[11];
         mapTileNum = new int[gp.maxWorldCol][gp.maxWorldRow];
- 
         stallTileSize = gp.tileSize * 4;
         stallMapCol = gp.maxWorldCol / 4;
         stallMapRow = gp.maxWorldRow / 4;
         stallTileNum = new int[stallMapCol][stallMapRow];
  
+        // Door is one tileSize away from the right and bottom walls
+        doorX = gp.screenWidth  - gp.tileSize;
+        doorY = gp.screenHeight - gp.tileSize * 8;
+
         getTileImage();
         loadMap("/res/maps/worldmap1.txt");
         loadStalls("/res/maps/stalls.txt");
-        // NOTE: loadStallInsides() is no longer called here — contactStall is always
-        // empty at startup. Call it from Gamepanel.update() instead.
+
+        // Load all three stall interiors so entering is instant
+        loadInteriorMap("red_stall.txt",   redStallMap);
+        loadInteriorMap("blue_stall.txt",  blueStallMap);
+        loadInteriorMap("green_stall.txt", greenStallMap);
     }
 
     private BufferedImage loadImage(String fileName) {
@@ -45,7 +68,7 @@ public class TileManager {
             }
         } catch (IOException ignored) {
         }
- 
+
         try {
             return ImageIO.read(new File("res/tiles/" + fileName));
         } catch (IOException e) {
@@ -57,27 +80,28 @@ public class TileManager {
     private void getTileImage() {
         tile[0] = new Tile();
         tile[0].image = loadImage("Grass.png");
- 
+
         tile[1] = new Tile();
         tile[1].image = loadImage("Rock.png");
         tile[1].collision = true;
  
         tile[2] = new Tile();
-        tile[2].image = loadImage("Floor.png");
- 
+        tile[2].image = loadImage("stall_wall.png");
+        tile[2].collision = true;
+
         tile[3] = new Tile();
         tile[3].image = loadImage("Bush.png");
         tile[3].collision = true;
  
         tile[4] = new Tile();
-        tile[4].image = loadImage("Concrete_Path.png");
- 
+        tile[4].image = loadImage("Stall_floor.png");
+
         tile[5] = new Tile();
         tile[5].image = loadImage("Road.png");
- 
+
         tile[6] = new Tile();
         tile[6].image = loadImage("Rough_Path.png");
- 
+
         tile[7] = new Tile();
         tile[7].image = loadImage("Tree.png");
         tile[7].collision = true;
@@ -110,7 +134,7 @@ public class TileManager {
                 String line = br.readLine();
                 if (line == null) break;
                 while (col < gp.maxWorldCol) {
-                    String numbers[] = line.split(" ");
+                    String[] numbers = line.split(" ");
                     if (col < numbers.length) {
                         int num = Integer.parseInt(numbers[col]);
                         mapTileNum[col][row] = num;
@@ -144,7 +168,7 @@ public class TileManager {
                 String line = br.readLine();
                 if (line == null) break;
                 while (col < stallMapCol) {
-                    String numbers[] = line.split(" ");
+                    String[] numbers = line.split(" ");
                     if (col < numbers.length) {
                         int num = Integer.parseInt(numbers[col]);
                         stallTileNum[col][row] = num;
@@ -162,29 +186,87 @@ public class TileManager {
         }
     }
 
-    public void loadStallInsides() {
-        String current = CollisionChecker.contactStall;
+    private void loadInteriorMap(String fileName, int[][] targetMap) {
+        try {
+            InputStream is = getClass().getResourceAsStream("/res/maps/" + fileName);
+            BufferedReader br;
+            if (is != null) {
+                br = new BufferedReader(new InputStreamReader(is));
+            } else {
+                br = new BufferedReader(new java.io.FileReader("res/maps/" + fileName));
+            }
 
-        // Player walked away — reset so coming back triggers again
+            int col = 0;
+            int row = 0;
+            while (col < interiorCols && row < interiorRows) {
+                String line = br.readLine();
+                if (line == null) break;
+                while (col < interiorCols) {
+                    String[] numbers = line.split("\\s+");
+                    if (col < numbers.length) {
+                        targetMap[col][row] = Integer.parseInt(numbers[col]);
+                    }
+                    col++;
+                }
+                if (col == interiorCols) {
+                    col = 0;
+                    row++;
+                }
+            }
+            br.close();
+        } catch (IOException e) {
+            System.out.println("Failed to load interior map: " + fileName);
+        }
+    }
+
+    public void loadStallInsides() {
+        String current = CollisionChecker.lastContactStall;
+
         if (current.isEmpty()) {
             lastHandledStall = "";
             return;
         }
 
-        // Same stall, already handled this contact — do nothing
+        // Same stall already set = no work to do
         if (current.equals(lastHandledStall)) return;
 
         lastHandledStall = current;
-
         switch (current) {
-            case "Blue"  -> {
-                System.out.println("yes");
-            } case "Red"   -> {
-                System.out.println("pls");
-            } case "Green" -> {
-                System.out.println("Say Wallahi");
-            }
+            case "Red"   -> currentStallMap = redStallMap;
+            case "Blue"  -> currentStallMap = blueStallMap;
+            case "Green" -> currentStallMap = greenStallMap;
         }
+    }
+
+    public void drawStallInterior(Graphics2D g2) {
+        // Draws the stall interior using the tile map, then draws the door on top
+        if (currentStallMap != null) {
+            int col = 0;
+            int row = 0;
+            while (col < interiorCols && row < interiorRows) {
+                int tileNum = currentStallMap[col][row];
+                int screenX = col * gp.tileSize;
+                int screenY = row * gp.tileSize;
+                g2.drawImage(tile[tileNum].image, screenX, screenY, gp.tileSize, gp.tileSize, null);
+                col++;
+                if (col == interiorCols) {
+                    col = 0;
+                    row++;
+                }
+            }
+        } else {
+            // Fallback in case no stall is loaded yet
+            g2.setColor(new Color(120, 90, 60));
+            g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
+        }
+
+        // Draw the exit door in the stall
+        g2.setColor(new Color(32, 32, 32));
+        g2.fillRect(doorX, doorY, gp.tileSize, gp.tileSize);
+    }
+
+    public int[][] getCurrentStallMap() {
+        return currentStallMap;
     }
 
     public void draw(Graphics2D g2) {
@@ -193,12 +275,11 @@ public class TileManager {
  
         while (worldCol < gp.maxWorldCol && worldRow < gp.maxWorldRow) {
             int tileNum = mapTileNum[worldCol][worldRow];
- 
             int worldX = worldCol * gp.tileSize;
             int worldY = worldRow * gp.tileSize;
             int screenX = worldX - gp.player.worldX + gp.player.screenX;
             int screenY = worldY - gp.player.worldY + gp.player.screenY;
- 
+
             if (worldX + gp.tileSize > gp.player.worldX - gp.player.screenX &&
                 worldX - gp.tileSize < gp.player.worldX + gp.player.screenX &&
                 worldY + gp.tileSize > gp.player.worldY - gp.player.screenY &&
@@ -224,7 +305,7 @@ public class TileManager {
                 int stallWorldY = stallRow * stallTileSize;
                 int stallScreenX = stallWorldX - gp.player.worldX + gp.player.screenX;
                 int stallScreenY = stallWorldY - gp.player.worldY + gp.player.screenY;
- 
+              
                 if (stallScreenX + stallTileSize > 0 && stallScreenX < gp.screenWidth &&
                     stallScreenY + stallTileSize > 0 && stallScreenY < gp.screenHeight) {
                     for (int i = 0; i < 4; i++) {
