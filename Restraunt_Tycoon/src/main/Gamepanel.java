@@ -34,6 +34,7 @@ public class Gamepanel extends JPanel implements Runnable {
     public OrderBoard orderBoard = new OrderBoard(this);
     public Inventory inventory = new Inventory();
     public RestockPanel restockPanel = new RestockPanel(inventory);
+    public inventoryPanel inventoryPanel = new inventoryPanel(inventory);
 
     // Customer array
     public Customer[] customers;
@@ -57,6 +58,7 @@ public class Gamepanel extends JPanel implements Runnable {
 
     // One-shot Used flags so held keys don't repeat actions
     private boolean toggleUsed = false;
+    private boolean InventoryUsed = false;
     private boolean fulfillUsed = false;
     private boolean enterUsed = false;
     private boolean backspaceUsed = false;
@@ -103,6 +105,7 @@ public class Gamepanel extends JPanel implements Runnable {
     public void update() {
         player.update();
 
+        updateInventoryPanel();
         if (gameState.equals(STALL_STATE)) {
             if (currentStallType.equals("Green")) {
                 updateRestockPanel();
@@ -238,6 +241,36 @@ public class Gamepanel extends JPanel implements Runnable {
         }
     }
 
+    private void updateInventoryPanel() {
+        // toggle inventory panel visibility
+        if (keyH.toggleInventoryPressed && !InventoryUsed) {
+            inventoryPanel.toggle();
+            InventoryUsed = true;
+        }
+        if (!keyH.toggleInventoryPressed) {
+            InventoryUsed = false;
+        }
+
+        // Handle arrow key navigation when inventory is visible
+        if (inventoryPanel.visible) {
+            if (keyH.upArrow && !upUsed) {
+                inventoryPanel.moveSelection(-1);
+                upUsed = true;
+            }
+            if (!keyH.upArrow) {
+                upUsed = false;
+            }
+
+            if (keyH.downArrow && !downUsed) {
+                inventoryPanel.moveSelection(1);
+                downUsed = true;
+            }
+            if (!keyH.downArrow) {
+                downUsed = false;
+            }
+        }
+    }
+
     private void drawBoostBar(Graphics2D g2) {
         int x = screenWidth - boostBarWidth - boostBarMargin;
         int y = boostBarMargin;
@@ -291,6 +324,10 @@ public class Gamepanel extends JPanel implements Runnable {
                 orderBoard.draw(g2);
             }
         }
+
+        // Draw inventory panel (available in both states)
+        inventoryPanel.draw(g2);
+
         g2.dispose();
     }
 }

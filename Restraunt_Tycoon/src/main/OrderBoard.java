@@ -112,6 +112,7 @@ public class OrderBoard {
         g2.drawRoundRect(PANEL_X, PANEL_Y, panelWidth, panelHeight, CORNER_ARC, CORNER_ARC);
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
+        // Draw each customer's order in a column
         for (int i = 0; i < rows; i++) {
             OrderList order = customers.get(i);
             int rowX = PANEL_X + PADDING + i * ROW_WIDTH;

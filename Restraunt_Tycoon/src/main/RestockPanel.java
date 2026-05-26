@@ -101,11 +101,6 @@ public class RestockPanel {
         g2.setColor(new Color(100, 220, 100));
         g2.drawString("Restock Cart:", panelX + PADDING, panelY + PADDING + 10);
 
-        // Navigation hint in the title row
-        g2.setFont(new Font("Arial", Font.PLAIN, 19));
-        g2.setColor(new Color(180, 180, 180));
-        g2.drawString("Arrow keys to select", panelX + PANEL_W - PADDING - 150, panelY + PADDING + 10);
-
         // Item rows — only show buyable items
         for (int i = 0; i < rows; i++) {
             int itemIndex = Buyable_items[i];
@@ -119,11 +114,9 @@ public class RestockPanel {
             }
 
             int qty = inventory.stallItems[itemIndex];
-            // Red when out of stock, yellow when selected, white normally
+            // Red when out of stock, white normally
             if (qty <= 0) {
                 g2.setColor(new Color(220, 60, 60));
-            } else if (selectedRow) {
-                g2.setColor(new Color(255, 220, 80));
             } else {
                 g2.setColor(Color.WHITE);
             }
