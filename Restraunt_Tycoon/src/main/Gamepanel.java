@@ -1,4 +1,5 @@
 package main;
+
 import entity.Customer;
 import entity.Player;
 import java.awt.*;
@@ -6,6 +7,7 @@ import javax.swing.*;
 import main.tile.TileManager;
 
 public class Gamepanel extends JPanel implements Runnable {
+
     // Screen tile settings
     final int orignalTileSize = 16;
     public final int tileSize = orignalTileSize * 4;
@@ -15,7 +17,7 @@ public class Gamepanel extends JPanel implements Runnable {
     public final int maxScreenCol = 20;
     public final int maxScreenRow = 15;
 
-    public final int screenWidth  = tileSize * maxScreenCol; // 1280 pixels
+    public final int screenWidth = tileSize * maxScreenCol; // 1280 pixels
     public final int screenHeight = tileSize * maxScreenRow; // 960 pixels
 
     int boostBarWidth = 220;
@@ -43,10 +45,10 @@ public class Gamepanel extends JPanel implements Runnable {
     // World settings
     public final int maxWorldCol = 60;
     public final int maxWorldRow = 45;
-    public final int worldWidth  = tileSize * maxWorldCol;
+    public final int worldWidth = tileSize * maxWorldCol;
     public final int worldHeight = tileSize * maxWorldRow;
 
-    public String gameState = "WORLD";
+    public String gameState = "WORLD"; // Either "WORLD" or "STALL"
     public final String WORLD_STATE = "WORLD";
     public final String STALL_STATE = "STALL";
 
@@ -60,7 +62,6 @@ public class Gamepanel extends JPanel implements Runnable {
     private boolean backspaceUsed = false;
     private boolean upUsed = false;
     private boolean downUsed = false;
-    private boolean addOrderUsed = false;
     private int lastDigitUsed = -1;
 
     public Gamepanel() {
@@ -110,7 +111,9 @@ public class Gamepanel extends JPanel implements Runnable {
         } else if (gameState.equals(WORLD_STATE)) {
             // Update all customers
             for (int i = 0; i < customersIndex; i++) {
-                customers[i].path();
+                customers[i].InPath();
+                // Always check stall contact each frame even if the customer isn't moving
+                cChecker.customerCheckTile(customers[i]);
             }
             long currentTime = System.currentTimeMillis();
             if (currentTime - lastCustomerSpawnTime >= customerSpawnInterval) {
@@ -121,12 +124,27 @@ public class Gamepanel extends JPanel implements Runnable {
     }
 
     private void spawnCustomer() {
-        if(customersIndex < customers.length){
+        if (customersIndex < customers.length) {
             int x = tileSize + tileSize * 20;
-            int y =  tileSize + tileSize * 38;
+            int y = tileSize + tileSize * 38;
             customers[customersIndex] = new Customer(this, x, y);
-            customersIndex++; 
+            customersIndex++;
         }
+    }
+
+    public int countCustomersOutsideStall(String stallType) {
+        int count = 0;
+        for (int i = 0; i < customersIndex; i++) {
+            Customer customer = customers[i];
+            if (customer == null) {
+                continue;
+            }
+            String contact = cChecker.getCustomerContactStall(customer);
+            if (stallType.equals(contact)) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private void updateOrderBoard() {
@@ -135,20 +153,18 @@ public class Gamepanel extends JPanel implements Runnable {
             orderBoard.visible = !orderBoard.visible;
             toggleUsed = true;
         }
-        if (!keyH.toggleOrdersPressed) toggleUsed = false;
+        if (!keyH.toggleOrdersPressed) {
+            toggleUsed = false;
+        }
 
         // fulfill next item on customer 1
         if (keyH.fulfillPressed && !fulfillUsed) {
             orderBoard.fulfillFirst();
             fulfillUsed = true;
         }
-
-        if (keyH.addOrderPressed && !addOrderUsed) {
-            orderBoard.addOrder(currentStallType);
-            addOrderUsed = true;
+        if (!keyH.fulfillPressed) {
+            fulfillUsed = false;
         }
-if (!keyH.addOrderPressed) addOrderUsed = false;
-        if (!keyH.fulfillPressed) fulfillUsed = false;
     }
 
     private void updateRestockPanel() {
@@ -157,9 +173,13 @@ if (!keyH.addOrderPressed) addOrderUsed = false;
             restockPanel.visible = !restockPanel.visible;
             toggleUsed = true;
         }
-        if (!keyH.toggleOrdersPressed) toggleUsed = false;
+        if (!keyH.toggleOrdersPressed) {
+            toggleUsed = false;
+        }
 
-        if (!restockPanel.visible) return;
+        if (!restockPanel.visible) {
+            return;
+        }
 
         // Keep KeyHandler typingMode in sync with the panel
         keyH.typingMode = restockPanel.typingMode;
@@ -170,13 +190,17 @@ if (!keyH.addOrderPressed) addOrderUsed = false;
                 restockPanel.moveSelection(-1);
                 upUsed = true;
             }
-            if (!keyH.upArrow) upUsed = false;
+            if (!keyH.upArrow) {
+                upUsed = false;
+            }
 
             if (keyH.downArrow && !downUsed) {
                 restockPanel.moveSelection(1);
                 downUsed = true;
             }
-            if (!keyH.downArrow) downUsed = false;
+            if (!keyH.downArrow) {
+                downUsed = false;
+            }
         }
 
         // Enter — either enter typing mode or confirm transfer
@@ -190,21 +214,27 @@ if (!keyH.addOrderPressed) addOrderUsed = false;
             }
             enterUsed = true;
         }
-        if (!keyH.enterPressed) enterUsed = false;
+        if (!keyH.enterPressed) {
+            enterUsed = false;
+        }
 
         // Number keys — append digit to typed quantity
         if (restockPanel.typingMode && keyH.lastDigit != -1 && keyH.lastDigit != lastDigitUsed) {
             restockPanel.appendDigit((char) ('0' + keyH.lastDigit));
             lastDigitUsed = keyH.lastDigit;
         }
-        if (keyH.lastDigit == -1) lastDigitUsed = -1;
+        if (keyH.lastDigit == -1) {
+            lastDigitUsed = -1;
+        }
 
         // Backspace — delete last typed digit
         if (keyH.backspacePressed && !backspaceUsed) {
             restockPanel.deleteDigit();
             backspaceUsed = true;
         }
-        if (!keyH.backspacePressed) backspaceUsed = false;
+        if (!keyH.backspacePressed) {
+            backspaceUsed = false;
+        }
     }
 
     private void drawBoostBar(Graphics2D g2) {
@@ -212,7 +242,7 @@ if (!keyH.addOrderPressed) addOrderUsed = false;
         int y = boostBarMargin;
         float ratio = player.getBoostChargeRatio();
         int innerWidth = boostBarWidth - 4;
-        int fillWidth = Math.max(0, Math.min(innerWidth, (int)(innerWidth * ratio)));
+        int fillWidth = Math.max(0, Math.min(innerWidth, (int) (innerWidth * ratio)));
 
         g2.setColor(new Color(0, 0, 0, 170));
         g2.fillRoundRect(x, y, boostBarWidth, boostBarHeight, 14, 14);

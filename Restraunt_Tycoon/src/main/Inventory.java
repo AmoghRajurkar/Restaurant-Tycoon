@@ -3,7 +3,7 @@ package main;
 public class Inventory {
     public static final String[] INVENTORY = {"Raw Meat", "Buns", "Ice", "Potatoes", "Milk", "Milk Shake Flavors", "Burgers", "Fries", "Milk Shakes", "Ice Creams"};
 
-    // Max the player can carry per item (money is index -1, handled separately)
+    // Max the player can carry per item
     public static final int PLAYER_CAP = 100;
 
     // Player starts with 0 of everything

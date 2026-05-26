@@ -1,8 +1,10 @@
 package main; // Package organize classes in Java, must be named the after the folder name
+
 import javax.swing.*;
 
 public class Main {
-    public static void main(String[] args){
+
+    public static void main(String[] args) {
         JFrame window = new JFrame(); // Create a new JFrame window
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Close the application when the window is closed
         window.setResizable(false); // Prevent the window from being resized
@@ -15,5 +17,7 @@ public class Main {
         window.setVisible(true); // Make the window visible
         gamePanel.startGameThread(); // Start the game thread to run the game loops
         gamePanel.requestFocusInWindow(); // Request focus for the game panel to receive key inputs
-	}
+
+        // We need to have customers generating and walking even if we r inside the stalls
+    }
 }

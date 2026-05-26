@@ -1,4 +1,5 @@
 package entity;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -7,8 +8,10 @@ import javax.imageio.ImageIO;
 import main.CollisionChecker;
 import main.Gamepanel;
 import main.KeyHandler;
+import main.OrderList;
 
 public class Player extends Entity {
+
     KeyHandler keyH; // Reference to the KeyHandler, which can be used to check the state of key presses
     public boolean boostActive = false; // Indicates whether the boost is currently active
     public int boostTimer = 0; // Timer to track the duration of the boost
@@ -52,7 +55,7 @@ public class Player extends Entity {
         isMoving = false;
 
         // Check for interaction key press to enter stall, only if we're in the world and standing next to a stall
-        if(keyH.interactPressed && gp.gameState.equals(gp.WORLD_STATE) && !CollisionChecker.lastContactStall.equals("")) {
+        if (keyH.interactPressed && gp.gameState.equals(gp.WORLD_STATE) && !CollisionChecker.lastContactStall.equals("")) {
             enterStall();
             keyH.interactPressed = false;
         }
@@ -74,7 +77,7 @@ public class Player extends Entity {
             }
 
             collisionOn = false;
-            if(gp.gameState.equals(gp.WORLD_STATE)) {
+            if (gp.gameState.equals(gp.WORLD_STATE)) {
                 gp.cChecker.checkTile(this);
             }
 
@@ -94,20 +97,28 @@ public class Player extends Entity {
 
             // If collision is false, player can move
             if (collisionOn == false) {
-                if(gp.gameState.equals(gp.WORLD_STATE)) {
+                if (gp.gameState.equals(gp.WORLD_STATE)) {
                     switch (direction) {
-                        case "up" -> worldY -= speed;
-                        case "down" -> worldY += speed;
-                        case "left" -> worldX -= speed;
-                        case "right" -> worldX += speed;
+                        case "up" ->
+                            worldY -= speed;
+                        case "down" ->
+                            worldY += speed;
+                        case "left" ->
+                            worldX -= speed;
+                        case "right" ->
+                            worldX += speed;
                     }
-                } else if(gp.gameState.equals(gp.STALL_STATE)) {
+                } else if (gp.gameState.equals(gp.STALL_STATE)) {
                     if (!gp.cChecker.checkStallTile(roomX, roomY, direction, speed)) {
                         switch (direction) {
-                            case "up" -> roomY -= speed;
-                            case "down" -> roomY += speed;
-                            case "left" -> roomX -= speed;
-                            case "right" -> roomX += speed;
+                            case "up" ->
+                                roomY -= speed;
+                            case "down" ->
+                                roomY += speed;
+                            case "left" ->
+                                roomX -= speed;
+                            case "right" ->
+                                roomX += speed;
                         }
                     }
                 }
@@ -138,7 +149,7 @@ public class Player extends Entity {
             boostActive = true;
             boostTimer = 30; // .5 second at 60 FPS
         }
-        
+
         // Handle boost timer and reloading logic
         if (boostActive) {
             boostTimer--;
@@ -148,7 +159,7 @@ public class Player extends Entity {
                 reloadTimer = 60; // 1 second reload time at 60 FPS
             }
         }
-        
+
         // Handle boost reloading timer
         if (boostReloading) {
             reloadTimer--;
@@ -156,7 +167,7 @@ public class Player extends Entity {
                 boostReloading = false;
             }
         }
-        
+
         // Set player speed based on boost status
         if (boostActive) {
             speed = 8; // Increased speed when boost is active
@@ -164,7 +175,7 @@ public class Player extends Entity {
             speed = 5;
         }
 
-        if(gp.gameState.equals(gp.STALL_STATE)) {
+        if (gp.gameState.equals(gp.STALL_STATE)) {
             // Exit zone spans the full height of the door (7 tiles tall)
             Rectangle exitZone = new Rectangle(
                     gp.tileM.doorX,
@@ -179,7 +190,7 @@ public class Player extends Entity {
                     gp.tileSize
             );
 
-            if(playerBox.intersects(exitZone)) {
+            if (playerBox.intersects(exitZone)) {
                 exitStall();
             }
         }
@@ -197,11 +208,19 @@ public class Player extends Entity {
     }
 
     public void enterStall() {
+        // Change game state and load the stall interior
         gp.gameState = gp.STALL_STATE;
         gp.tileM.LoadStallInterior();
         gp.currentStallType = CollisionChecker.lastContactStall;
         // Load fresh orders for whichever stall we just walked into
         gp.orderBoard.loadForStall(CollisionChecker.lastContactStall);
+        int waitingCustomers = gp.countCustomersOutsideStall(CollisionChecker.lastContactStall);
+        System.out.println("Customers: " + waitingCustomers + " at " + CollisionChecker.lastContactStall);
+        if (waitingCustomers > 0) {
+            for (int i = 0; i < waitingCustomers; i++) {
+                gp.orderBoard.customers.add(new OrderList(1, CollisionChecker.lastContactStall));
+            }
+        }
         roomX = gp.screenWidth / 2 - gp.tileSize / 2;
         roomY = gp.screenHeight - 350;
         gp.repaint();
@@ -222,10 +241,14 @@ public class Player extends Entity {
         if (!isMoving) {
             // Use still images when the player is not moving
             switch (direction) {
-                case "up" -> image = upStill;
-                case "down" -> image = downStill;
-                case "left" -> image = leftStill;
-                case "right" -> image = rightStill;
+                case "up" ->
+                    image = upStill;
+                case "down" ->
+                    image = downStill;
+                case "left" ->
+                    image = leftStill;
+                case "right" ->
+                    image = rightStill;
             }
         } else {
             // Use walking animation when the player is moving
@@ -238,7 +261,7 @@ public class Player extends Entity {
                     }
                 }
                 case "down" -> {
-                if (SpriteNum == 1) {
+                    if (SpriteNum == 1) {
                         image = down1;
                     } else {
                         image = down2;
@@ -262,7 +285,7 @@ public class Player extends Entity {
         }
 
         // Move the player or move the world depending on the game state
-        if(gp.gameState.equals(gp.WORLD_STATE)) {
+        if (gp.gameState.equals(gp.WORLD_STATE)) {
             g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null);
         } else {
             g2.drawImage(image, roomX, roomY, gp.tileSize, gp.tileSize, null);
@@ -284,8 +307,7 @@ public class Player extends Entity {
             downStill = ImageIO.read(new File("res/player/down_still.png"));
             leftStill = ImageIO.read(new File("res/player/left_still.png"));
             rightStill = ImageIO.read(new File("res/player/right_still.png"));
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             System.out.println("Error loading player images");
         }
     }

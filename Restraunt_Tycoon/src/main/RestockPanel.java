@@ -1,7 +1,9 @@
 package main;
+
 import java.awt.*;
 
 public class RestockPanel {
+
     private final Inventory inventory;
 
     private static final int PANEL_W = 720;
@@ -30,41 +32,51 @@ public class RestockPanel {
 
     // Move selection up/down through the buyable item list
     public void moveSelection(int dir) {
-        if (typingMode) return;
+        if (typingMode) {
+            return;
+        }
         selectedIndex = (selectedIndex + dir + Buyable_items.length) % Buyable_items.length;
     }
 
     // Append a digit to the typed quantity, up to 4 digits long
     public void appendDigit(char digit) {
-        if (typedQty.length() < 4) typedQty += digit;
+        if (typedQty.length() < 4) {
+            typedQty += digit;
+        }
     }
 
     // Remove the last digit from the typed quantity
     public void deleteDigit() {
-        if (!typedQty.isEmpty()) typedQty = typedQty.substring(0, typedQty.length() - 1);
+        if (!typedQty.isEmpty()) {
+            typedQty = typedQty.substring(0, typedQty.length() - 1);
+        }
     }
 
     // Gives the typed quantity of items from the stall to the player
     public void confirmTransfer() {
-        if (typedQty.isEmpty()) return;
+        if (typedQty.isEmpty()) {
+            return;
+        }
         int amount = Integer.parseInt(typedQty);
         int itemIndex = Buyable_items[selectedIndex];
-        int taken  = inventory.giveToPlayer(itemIndex, amount);
+        int taken = inventory.giveToPlayer(itemIndex, amount);
         System.out.println("Got " + taken + "x " + Inventory.INVENTORY[itemIndex]);
 
         // Reset typing mode and clear typed quantity after confirming
-        typedQty   = "";
+        typedQty = "";
         typingMode = false;
     }
 
     // Activates typing mode for the currently selected item
     public void selectCurrentItem() {
         typingMode = true;
-        typedQty   = "";
+        typedQty = "";
     }
 
     public void draw(Graphics2D g2) {
-        if (!visible) return;
+        if (!visible) {
+            return;
+        }
 
         int rows = Buyable_items.length;
         int panelH = HEADER_H + rows * ROW_HEIGHT + PADDING + INPUT_H + PADDING * 2;

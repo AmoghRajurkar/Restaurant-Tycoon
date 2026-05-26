@@ -1,4 +1,5 @@
 package main.tile;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -12,6 +13,7 @@ import main.CollisionChecker;
 import main.Gamepanel;
 
 public class TileManager {
+
     Gamepanel gp;
     public Tile[] tile;
     public int mapTileNum[][];
@@ -27,8 +29,8 @@ public class TileManager {
     private final int interiorRows = 15;
 
     // One 2D array per stall, loaded once at startup
-    private final int[][] redStallMap   = new int[interiorCols][interiorRows];
-    private final int[][] blueStallMap  = new int[interiorCols][interiorRows];
+    private final int[][] redStallMap = new int[interiorCols][interiorRows];
+    private final int[][] blueStallMap = new int[interiorCols][interiorRows];
     private final int[][] greenStallMap = new int[interiorCols][interiorRows];
 
     // Points to whichever stall the player just entered
@@ -67,7 +69,8 @@ public class TileManager {
             if (is != null) {
                 return ImageIO.read(is);
             }
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
 
         try {
             return ImageIO.read(new File(fileName));
@@ -191,7 +194,9 @@ public class TileManager {
             int row = 0;
             while (col < gp.maxWorldCol && row < gp.maxWorldRow) {
                 String line = br.readLine();
-                if (line == null) break;
+                if (line == null) {
+                    break;
+                }
                 while (col < gp.maxWorldCol) {
                     String[] numbers = line.split(" ");
                     if (col < numbers.length) {
@@ -225,7 +230,9 @@ public class TileManager {
             int row = 0;
             while (col < stallMapCol && row < stallMapRow) {
                 String line = br.readLine();
-                if (line == null) break;
+                if (line == null) {
+                    break;
+                }
                 while (col < stallMapCol) {
                     String[] numbers = line.split(" ");
                     if (col < numbers.length) {
@@ -260,7 +267,9 @@ public class TileManager {
             int row = 0;
             while (col < interiorCols && row < interiorRows) {
                 String line = br.readLine();
-                if (line == null) break;
+                if (line == null) {
+                    break;
+                }
                 while (col < interiorCols) {
                     String[] numbers = line.split("\\s+");
                     if (col < numbers.length) {
@@ -289,13 +298,18 @@ public class TileManager {
         }
 
         // Do nothing if player just entered the same stall, avoids reloading the same map every frame while inside
-        if (current.equals(lastHandledStall)) return;
+        if (current.equals(lastHandledStall)) {
+            return;
+        }
 
         lastHandledStall = current;
         switch (current) {
-            case "Red" -> currentStallMap = redStallMap;
-            case "Blue" -> currentStallMap = blueStallMap;
-            case "Green" -> currentStallMap = greenStallMap;
+            case "Red" ->
+                currentStallMap = redStallMap;
+            case "Blue" ->
+                currentStallMap = blueStallMap;
+            case "Green" ->
+                currentStallMap = greenStallMap;
         }
     }
 
@@ -338,10 +352,10 @@ public class TileManager {
             int screenX = worldX - gp.player.worldX + gp.player.screenX;
             int screenY = worldY - gp.player.worldY + gp.player.screenY;
 
-            if (worldX + gp.tileSize > gp.player.worldX - gp.player.screenX &&
-                worldX - gp.tileSize < gp.player.worldX + gp.player.screenX &&
-                worldY + gp.tileSize > gp.player.worldY - gp.player.screenY &&
-                worldY - gp.tileSize < gp.player.worldY + gp.player.screenY) {
+            if (worldX + gp.tileSize > gp.player.worldX - gp.player.screenX
+                    && worldX - gp.tileSize < gp.player.worldX + gp.player.screenX
+                    && worldY + gp.tileSize > gp.player.worldY - gp.player.screenY
+                    && worldY - gp.tileSize < gp.player.worldY + gp.player.screenY) {
                 g2.drawImage(tile[tileNum].image, screenX, screenY, gp.tileSize, gp.tileSize, null);
             }
             worldCol++;
@@ -362,8 +376,8 @@ public class TileManager {
                 int stallWorldY = stallRow * stallTileSize;
                 int stallScreenX = stallWorldX - gp.player.worldX + gp.player.screenX;
                 int stallScreenY = stallWorldY - gp.player.worldY + gp.player.screenY;
-                if (stallScreenX + stallTileSize > 0 && stallScreenX < gp.screenWidth &&
-                    stallScreenY + stallTileSize > 0 && stallScreenY < gp.screenHeight) {
+                if (stallScreenX + stallTileSize > 0 && stallScreenX < gp.screenWidth
+                        && stallScreenY + stallTileSize > 0 && stallScreenY < gp.screenHeight) {
                     for (int i = 0; i < 4; i++) {
                         for (int j = 0; j < 4; j++) {
                             int bgTileX = stallCol * 4 + i;

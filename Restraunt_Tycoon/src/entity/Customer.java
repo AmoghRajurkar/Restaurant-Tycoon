@@ -1,4 +1,5 @@
 package entity;
+
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -8,6 +9,7 @@ import javax.imageio.ImageIO;
 import main.Gamepanel;
 
 public class Customer extends Entity {
+
     public int screenX; // X position of the customer on the screen, which can be used for rendering the customer
     public int screenY; // Y position of the customer on the screen, which can be used for rendering the customer
     public int stall1X = 760;
@@ -16,7 +18,8 @@ public class Customer extends Entity {
     public int stall2Y = 1010;
     public int animationThreshold; // Variable to control the speed of the walking animation, which can be adjusted based on boost status
     public Random rand = new Random();
-    public int path = rand.nextInt(2)+1; // Randomly choose a path for the customer to take (1 or 2)
+    public int InPath = rand.nextInt(2) + 1; // Randomly choose a path to come in for the customer to take (1 or 2)
+    public int outPath = InPath; // Out path is based on in path
 
     public Customer(Gamepanel gp, int x, int y) {
         super(gp);
@@ -34,7 +37,6 @@ public class Customer extends Entity {
         getCustomerImage();
     }
 
-
     private void getCustomerImage() {
         // Load customer images for different directions and animations
         try {
@@ -50,48 +52,40 @@ public class Customer extends Entity {
             downStill = ImageIO.read(new File("res/customer/customer1down_still.png"));
             leftStill = ImageIO.read(new File("res/customer/customer1left_still.png"));
             rightStill = ImageIO.read(new File("res/customer/customer1right_still.png"));
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             System.out.println("Error loading customer images");
         }
     }
 
+    public void InPath() {
+        if (InPath == 1) {
+            if (worldY > stall1Y) {
+                direction = "up";
+                update(); // Update the customer's position and behavior based on the chosen InPath
 
-    public void path(){
-        
-        if (path==1){
-            if (worldY>stall1Y){
-                direction = "up";
-                update(); // Update the customer's position and behavior based on the chosen path
-                
-            }
-            else if (worldX>stall1X){
+            } else if (worldX > stall1X) {
                 direction = "left";
-                update(); // Update the customer's position and behavior based on the chosen path
-                
+                update(); // Update the customer's position and behavior based on the chosen InPath
+
             }
-             
+
         }
-        if (path==2){
-            if (worldY>1300){
+        if (InPath == 2) {
+            if (worldY > 1300) {
                 direction = "up";
-                update(); // Update the customer's position and behavior based on the chosen path
-            }
-            else if (worldX<2000){
+                update(); // Update the customer's position and behavior based on the chosen InPath
+            } else if (worldX < 2000) {
                 direction = "right";
-                update(); // Update the customer's position and behavior based on the chosen path
-            }
-            else if (worldY>stall2Y){
+                update(); // Update the customer's position and behavior based on the chosen InPath
+            } else if (worldY > stall2Y) {
                 direction = "up";
-                update(); // Update the customer's position and behavior based on the chosen path
-            }
-            else if (worldX<stall2X){
+                update(); // Update the customer's position and behavior based on the chosen InPath
+            } else if (worldX < stall2X) {
                 direction = "right";
-                update(); // Update the customer's position and behavior based on the chosen path
+                update(); // Update the customer's position and behavior based on the chosen InPath
             }
         }
     }
-
 
     public void update() {
         // Logic to update the customer's position and behavior goes here
@@ -105,22 +99,21 @@ public class Customer extends Entity {
 
         // Check world boundary — stop the player when the edge of the map would come into view
         if (direction.equals("up") && worldY <= 0) {
-            collisionOn = true;  
-            SpriteCounter = 0;    
+            collisionOn = true;
+            SpriteCounter = 0;
         }
         if (direction.equals("down") && worldY + gp.tileSize >= gp.worldHeight) {
             collisionOn = true;
             SpriteCounter = 0;
         }
-        if (direction.equals("left") && worldX  <= 0) {
+        if (direction.equals("left") && worldX <= 0) {
             collisionOn = true;
             SpriteCounter = 0;
         }
-        if (direction.equals("right") && worldX  + gp.tileSize >= gp.worldWidth) {
+        if (direction.equals("right") && worldX + gp.tileSize >= gp.worldWidth) {
             collisionOn = true;
             SpriteCounter = 0;
         }
-
 
         // If collision is false, customer can move
         if (collisionOn == false) {
@@ -135,19 +128,19 @@ public class Customer extends Entity {
                     worldY += speed; // Update worldY to reflect the customer's movement in the world
                     isMoving = true;
                     break;
-                        
-                 }
+                }
                 case "left" -> {
                     worldX -= speed; // Update worldX to reflect the customer's movement in the world
-                    isMoving = true;    
+                    isMoving = true;
                     break;
                 }
-                    case "right" -> {
+                case "right" -> {
                     worldX += speed; // Update worldX to reflect the customer's movement in the world
                     isMoving = true;
                     break;
                 }
             }
+
             SpriteCounter++; // Increment the sprite counter for animation timing
             if (SpriteCounter > animationThreshold) {
                 if (SpriteNum == 1) {
@@ -161,22 +154,22 @@ public class Customer extends Entity {
             SpriteCounter = 0; // Stop animation timing when idle
             SpriteNum = 1; // Reset to the first frame so still image is stable
         }
-        
-
-
-
-
     }
+
     public void draw(Graphics2D g2) {
         BufferedImage image = null; // Variable to hold the current image to be drawn based on the player's direction and animation state
 
         if (!isMoving) {
             // Use still images when the player is not moving
             switch (direction) {
-                case "up" -> image = upStill;
-                case "down" -> image = downStill;
-                case "left" -> image = leftStill;
-                case "right" -> image = rightStill;
+                case "up" ->
+                    image = upStill;
+                case "down" ->
+                    image = downStill;
+                case "left" ->
+                    image = leftStill;
+                case "right" ->
+                    image = rightStill;
             }
         } else {
             // Use walking animation when the player is moving
@@ -189,7 +182,7 @@ public class Customer extends Entity {
                     }
                 }
                 case "down" -> {
-                if (SpriteNum == 1) {
+                    if (SpriteNum == 1) {
                         image = down1;
                     } else {
                         image = down2;

@@ -1,8 +1,10 @@
 package main;
+
 import java.util.ArrayList;
 import java.util.Random;
 
 public class OrderList {
+
     // Each order is represented as a String array of length 2
     // The first element is the item name and the second element is the quantity of that item remaining in the order
     public ArrayList<String[]> items = new ArrayList<>();
@@ -36,14 +38,18 @@ public class OrderList {
                     }
                 }
             }
-            case 2 -> System.out.println("level 2 food possibilities");
-            case 3 -> System.out.println("level 3 food possibilities");
+            case 2 ->
+                System.out.println("level 2 food possibilities");
+            case 3 ->
+                System.out.println("level 3 food possibilities");
         }
     }
 
     // Gives food, one item from the order list. Returns true if the order is completely fulfilled and can be removed from the queue
     public boolean giveFood() {
-        if (items.isEmpty()) return true;
+        if (items.isEmpty()) {
+            return true;
+        }
         String[] first = items.get(0);
         int qty = Integer.parseInt(first[1]) - 1;
         if (qty <= 0) {
@@ -51,11 +57,6 @@ public class OrderList {
         } else {
             first[1] = String.valueOf(qty);
         }
-        return items.isEmpty();
-    }
-
-    // Returns true if the order list is empty and the customer can be removed from the queue
-    public boolean isEmpty() {
         return items.isEmpty();
     }
 }
