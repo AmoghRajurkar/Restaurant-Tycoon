@@ -51,6 +51,7 @@ public class Player extends Entity {
         direction = "down"; // Set the default direction of the player
     }
 
+    @SuppressWarnings("static-access")
     public void update() {
         // Update game state logic
         isMoving = false;
@@ -65,6 +66,7 @@ public class Player extends Entity {
         if (gp.keyH.UpgradeCookPressed && !gp.UpgradeCookUsed) {
             UpgradeCookLevel();
             System.out.println("Cook level upgraded to " + cookLevel);
+            gp.inventory.playerMoney -= 100 * cookLevel; // Subtract money from player inventory
             gp.UpgradeCookUsed = true;
         }
         if (!gp.keyH.UpgradeCookPressed) {

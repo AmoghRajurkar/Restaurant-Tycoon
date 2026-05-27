@@ -39,7 +39,6 @@ public class Gamepanel extends JPanel implements Runnable {
     // Customer array
     public Customer[] customers;
     public int customersIndex = 0;
-    public int customerCounter = 0;
     private long lastCustomerSpawnTime = System.currentTimeMillis();
     private final long customerSpawnInterval = 15000; // 15 seconds in milliseconds
     private final int maxCustomers = 8; // Set a reasonable max
@@ -115,25 +114,10 @@ public class Gamepanel extends JPanel implements Runnable {
             }
         } else if (gameState.equals(WORLD_STATE)) {
             // Update all customers
-            for (int i = 0; i < customers.length; i++) {
-                Customer customer = customers[i];
-                if (customer == null) {
-                    continue;
-                }
-                if (!customer.isServed) {
-                    customer.InPath();
-                }
-                if (customer.isServed) {
-                    customer.outPath();
-                    if (customer.leftMap) {
-                        System.out.println("Customer " + i + " has left the map.");
-                        customers[i] = null; // Remove customer from array once they have left the map
-                        customerCounter--;
-                        continue;
-                    }
-                }
+            for (int i = 0; i < customersIndex; i++) {
+                customers[i].InPath();
                 // Always check stall contact each frame even if the customer isn't moving
-                cChecker.customerCheckTile(customer);
+                cChecker.customerCheckTile(customers[i]);
             }
             long currentTime = System.currentTimeMillis();
             if (currentTime - lastCustomerSpawnTime >= customerSpawnInterval) {
