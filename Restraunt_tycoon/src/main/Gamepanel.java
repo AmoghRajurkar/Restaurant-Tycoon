@@ -173,7 +173,7 @@ public class Gamepanel extends JPanel implements Runnable {
         }
 
         int x = tileSize + tileSize * 20;
-        int y = tileSize + tileSize * 38;
+        int y = tileSize + tileSize * 43;
         for (int i = 0; i < customers.length; i++) {
             if (customers[i] == null) {
                 customers[i] = new Customer(this, x, y);
