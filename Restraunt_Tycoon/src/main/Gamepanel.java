@@ -35,6 +35,7 @@ public class Gamepanel extends JPanel implements Runnable {
     public Inventory inventory = new Inventory();
     public RestockPanel restockPanel = new RestockPanel(inventory);
     public inventoryPanel inventoryPanel = new inventoryPanel(inventory);
+    public InformationPanel informationPanel = new InformationPanel();
     public Messages messages;
 
     // Customer array
@@ -60,6 +61,7 @@ public class Gamepanel extends JPanel implements Runnable {
     // One-shot Used flags so held keys don't repeat actions
     private boolean toggleUsed = false;
     private boolean InventoryUsed = false;
+    private boolean infoUsed = false;
     private boolean fulfillUsed = false;
     private boolean enterUsed = false;
     private boolean backspaceUsed = false;
@@ -109,6 +111,7 @@ public class Gamepanel extends JPanel implements Runnable {
         messages.update();
 
         updateInventoryPanel();
+        updateInformationPanel();
         if (gameState.equals(STALL_STATE)) {
             if (currentStallType.equals("Green")) {
                 updateRestockPanel();
@@ -276,6 +279,16 @@ public class Gamepanel extends JPanel implements Runnable {
         }
     }
 
+    private void updateInformationPanel() {
+        if (keyH.toggleInfoPressed && !infoUsed) {
+            informationPanel.toggle();
+            infoUsed = true;
+        }
+        if (!keyH.toggleInfoPressed) {
+            infoUsed = false;
+        }
+    }
+
     private void drawBoostBar(Graphics2D g2) {
         int x = screenWidth - boostBarWidth - boostBarMargin;
         int y = boostBarMargin;
@@ -334,6 +347,7 @@ public class Gamepanel extends JPanel implements Runnable {
 
         // Draw inventory panel
         inventoryPanel.draw(g2);
+        informationPanel.draw(g2);
 
         g2.dispose();
     }

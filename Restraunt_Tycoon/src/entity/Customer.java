@@ -19,16 +19,10 @@ public class Customer extends Entity {
     public int animationThreshold; // Variable to control the speed of the walking animation, which can be adjusted based on boost status
     public Random rand = new Random();// Random number generator to determine the customer's path and behavior
     public int InPath = rand.nextInt(2) + 1; // Randomly choose a path to come in for the customer to take (1 or 2)
-    public boolean isServed = true; // Flag to indicate whether the customer has been served or not
+    public boolean isServed = false; // Flag to indicate whether the customer has been served or not
     public int outPath = InPath; // Out path is based on in path
     public boolean leftMap = false; // Flag to indicate whether the customer has left the map or not
 
-    /** 
-     * Constructor for the Customer class, which initializes the customer's position, speed, direction, and collision area. It also loads the customer's images for different directions and animations. 
-     * @param gp The Gamepanel object, which provides access to the game environment and resources
-     * @param x The initial X position of the customer in the world, which can be used for determining the customer's starting point and movement
-     * @param y The initial Y position of the customer in the world, which can be used for determining the customer's starting point and movement 
-    */
     public Customer(Gamepanel gp, int x, int y) {
         super(gp);
         direction = "up";
@@ -45,11 +39,6 @@ public class Customer extends Entity {
         getCustomerImage();
     }
 
-
-
-    /**
-     * Method to load the customer's images for different directions and animations, which can be used for rendering the customer in the game. The method uses ImageIO to read the image files from the specified paths and assigns them to the corresponding variables for each direction and animation state. If there is an error loading the images, it catches the IOException and prints an error message.
-     */ 
     private void getCustomerImage() {
         // Load customer images for different directions and animations
         try {
@@ -69,9 +58,7 @@ public class Customer extends Entity {
             System.out.println("Error loading customer images");
         }
     }
-    /**
-     * Method to determine the customer's path to the stall based on the randomly chosen InPath variable. The method checks the customer's current position in the world and updates the direction accordingly to guide the customer towards the stall. It also calls the update() method to update the customer's position and behavior based on the chosen InPath. The method handles two different paths for the customer to take, depending on whether InPath is 1 or 2, and adjusts the direction and movement accordingly to ensure that the customer reaches the stall successfully.
-     */
+
     public void InPath() {
         if (InPath == 1) {
             if (worldY > stall1Y) {
@@ -101,9 +88,7 @@ public class Customer extends Entity {
             }
         }
     }
-    /**
-     * Method to determine the customer's path out of the map after being served, based on the randomly chosen InPath variable. The method checks the customer's current position in the world and updates the direction accordingly to guide the customer towards the exit. It also calls the update() method to update the customer's position and behavior based on the chosen InPath. The method handles two different paths for the customer to take, depending on whether InPath is 1 or 2, and adjusts the direction and movement accordingly to ensure that the customer leaves the map successfully after being served.
-     */
+
     public void outPath() {
         if (InPath == 1) {
             if (worldY > 0) {
@@ -133,13 +118,7 @@ public class Customer extends Entity {
         }
 
     }
-    /**
-     * Method to update the customer's position and behavior based on the current direction, speed, and collision status. 
-     * The method checks for collisions with tiles and other customers, as well as world boundaries, to determine whether 
-     * the customer can move in the desired direction. If there are no collisions, it updates the customer's position accordingly 
-     * and manages the walking animation by switching between different sprite images based on the SpriteCounter and animationThreshold variables. 
-     * If there is a collision or if the customer is idle, it resets the animation to a still image to ensure a stable appearance when not moving. 
-    */
+
     public void update() {
         // Logic to update the customer's position and behavior goes here
         isMoving = false;
@@ -208,15 +187,7 @@ public class Customer extends Entity {
             SpriteNum = 1; // Reset to the first frame so still image is stable
         }
     }
-    /**
-     * Method to draw the customer on the screen based on the current direction, animation state, 
-     * and position in the world. The method selects the appropriate image to draw based on whether 
-     * the customer is moving or idle, and which direction they are facing. It calculates the drawing 
-     * position on the screen by adjusting the customer's world coordinates relative to the player's position
-     * and screen coordinates. Finally, it uses the Graphics2D object to draw the selected image at the calculated 
-     * position with the specified tile size.
-     * @param g2 The Graphics2D object used for drawing the customer on the screen, which provides methods for rendering images and shapes in the game
-     */
+
     public void draw(Graphics2D g2) {
         BufferedImage image = null; // Variable to hold the current image to be drawn based on the player's direction and animation state
 

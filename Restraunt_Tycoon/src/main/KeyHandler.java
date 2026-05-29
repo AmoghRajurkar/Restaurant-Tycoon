@@ -10,6 +10,7 @@ public class KeyHandler implements KeyListener {
     public boolean interactPressed; // E — enter/exit stalls
     public boolean toggleOrdersPressed; // Tab — show/hide order/restock board
     public boolean toggleInventoryPressed; // I - show/hide inventory
+    public boolean toggleInfoPressed; // 1 - show/hide information panel
     public boolean enterPressed; // Enter — select item or confirm quantity
     public boolean backspacePressed; // Backspace — delete last digit
     public boolean fulfillPressed; // 2 — send order (red/blue)
@@ -77,6 +78,9 @@ public class KeyHandler implements KeyListener {
         if (code == KeyEvent.VK_I) {
             toggleInventoryPressed = true;
         }
+        if (code == KeyEvent.VK_1) {
+            toggleInfoPressed = true;
+        }
 
         // Capture digit keys 0-9
         if (code >= KeyEvent.VK_0 && code <= KeyEvent.VK_9) {
@@ -130,6 +134,9 @@ public class KeyHandler implements KeyListener {
         }
         if (code == KeyEvent.VK_I) {
             toggleInventoryPressed = false;
+        }
+        if (code == KeyEvent.VK_1) {
+            toggleInfoPressed = false;
         }
 
         // Clear digit on release so each keypress registers once
