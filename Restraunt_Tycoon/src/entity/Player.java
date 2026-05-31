@@ -83,7 +83,8 @@ public class Player extends Entity {
             if (gp.Current_level == 1 && !CollisionChecker.lastContactStall.equals("")) {
                 enterRoom("stall");
                 keyH.interactPressed = false;
-            } else if (gp.Current_level == 2 && !CollisionChecker.lastContactTruck.equals("")) {
+            } else if (gp.Current_level >= 2 && !CollisionChecker.lastContactTruck.equals("")) {
+                // Treat level 2+ as truck levels (includes level 3 fallback)
                 enterRoom("truck");
                 keyH.interactPressed = false;
             }
@@ -285,11 +286,6 @@ public class Player extends Entity {
         } else if ("truck".equals(roomType)) {
             gp.currentStallType = CollisionChecker.lastContactTruck;
             gp.orderBoard.loadForStall(CollisionChecker.lastContactTruck);
-            if (gp.currentStallType.equals("Red")) {
-                for (int i = 0; i < 4; i++) {
-                    gp.orderBoard.customers.add(new OrderList(2, "Red"));
-                }
-            }
         }
 
         roomX = gp.screenWidth / 2 - gp.tileSize / 2;

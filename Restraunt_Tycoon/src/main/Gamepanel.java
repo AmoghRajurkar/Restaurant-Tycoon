@@ -43,7 +43,7 @@ public class Gamepanel extends JPanel implements Runnable {
     public final String WORLD_STATE = "WORLD";
     public final String STALL_STATE = "STALL";
     public final String RESTOCK_STATE = "RESTOCK";
-    public int Current_level = 1;
+    public int Current_level = 3;
 
     // Tracks which stall the player is currently inside
     public String currentStallType = "";
@@ -71,6 +71,7 @@ public class Gamepanel extends JPanel implements Runnable {
     public InventoryPanel inventoryPanel = new InventoryPanel(inventory);
     public InformationPanel informationPanel = new InformationPanel();
     public Messages messages;
+    public boolean level3RestockZone = false;
 
     public Gamepanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -115,6 +116,13 @@ public class Gamepanel extends JPanel implements Runnable {
         player.update();
         messages.update();
 
+        if (Current_level == 3) {
+            Rectangle zone = new Rectangle(33 * tileSize, 17 * tileSize, 4 * tileSize, 4 * tileSize);
+            Rectangle playerRect = new Rectangle(player.worldX, player.worldY, tileSize, tileSize);
+            level3RestockZone = zone.intersects(playerRect);
+            restockPanel.visible = level3RestockZone;
+        }
+
         updateInventoryPanel();
         updateInformationPanel();
         if (gameState.equals(STALL_STATE)) {
@@ -123,6 +131,10 @@ public class Gamepanel extends JPanel implements Runnable {
             } else {
                 updateOrderBoard();
             }
+        }
+
+        if (Current_level == 3 && level3RestockZone) {
+            updateRestockPanel();
         } else if (Current_level == 1 && gameState.equals(WORLD_STATE)) {
             // Update all customers
             for (int i = 0; i < customers.length; i++) {
@@ -405,6 +417,13 @@ public class Gamepanel extends JPanel implements Runnable {
             tileM.drawInterior(g2);
         }
 
+        if (Current_level == 3 && gameState.equals(WORLD_STATE)) {
+            g2.setColor(new Color(139, 69, 19));
+            int sx = 33 * tileSize - player.worldX + player.screenX;
+            int sy = 17 * tileSize - player.worldY + player.screenY;
+            g2.fillRect(sx, sy, 4 * tileSize, 4 * tileSize);
+        }
+
         player.draw(g2);
         drawBoostBar(g2);
         drawCookBar(g2);
@@ -417,6 +436,10 @@ public class Gamepanel extends JPanel implements Runnable {
             } else {
                 orderBoard.draw(g2);
             }
+        }
+
+        if (Current_level == 3 && level3RestockZone) {
+            restockPanel.draw(g2);
         }
 
         // Draw inventory panel

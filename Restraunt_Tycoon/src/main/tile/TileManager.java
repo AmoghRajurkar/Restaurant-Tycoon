@@ -43,7 +43,7 @@ public class TileManager {
 
     public TileManager(Gamepanel gp) {
         this.gp = gp;
-        tile = new Tile[40];
+        tile = new Tile[55];
         mapTileNum = new int[gp.maxWorldCol][gp.maxWorldRow];
 
         stallTileSize = gp.tileSize * 4;
@@ -74,11 +74,15 @@ public class TileManager {
             }
             case 2 -> {
                 loadWorldMap("/res/maps/worldmap2.txt");
-                loadTrucksInWorld("/res/maps/trucks");
+                loadTrucksInWorld("/res/maps/trucks.txt");
 
                 // Preload truck interiors so entering is instant
                 loadInteriorMap("red_truck", redtruckMap);
                 loadInteriorMap("green_truck", greentruckMap);
+            }
+
+            case 3 -> {
+                loadWorldMap("/res/maps/worldmap3.txt");
             }
         }
     }
@@ -245,6 +249,77 @@ public class TileManager {
 
         tile[39] = new Tile();
         tile[39].image = loadImage("res/tiles/Truck_Restock_floor.png");
+
+        tile[40] = new Tile();
+        tile[40].image = loadImage("res/tiles/grill_horizontal_R2.png");
+        tile[40].collision = true;
+
+        tile[41] = new Tile();
+        tile[41].image = loadImage("res/tiles/grill_horizontal_M2.png");
+        tile[41].collision = true;
+
+        tile[42] = new Tile();
+        tile[42].image = loadImage("res/tiles/grill_horizontal_L2.png");
+        tile[42].collision = true;
+
+        tile[43] = new Tile();
+        tile[43].image = loadImage("res/tiles/grill_vertical_T2.png");
+        tile[43].collision = true;
+
+        tile[44] = new Tile();
+        tile[44].image = loadImage("res/tiles/grill_vertical_M2.png");
+        tile[44].collision = true;
+
+        tile[45] = new Tile();
+        tile[45].image = loadImage("res/tiles/grill_vertical_B2.png");
+        tile[45].collision = true;
+
+        tile[46] = new Tile();
+        tile[46].image = loadImage("res/tiles/ice_cream_fridge2.png");
+        tile[46].collision = true;
+
+        tile[47] = new Tile();
+        tile[47].image = loadImage("res/tiles/blender_table2.png");
+        tile[47].collision = true;
+
+        tile[48] = new Tile();
+        tile[48].image = loadImage("res/tiles/fryer2.png");
+        tile[48].collision = true;
+
+        tile[49] = new Tile();
+        tile[49].image = loadImage("res/tiles/Popcorn_machine2.png");
+        tile[49].collision = true;
+
+        tile[50] = new Tile();
+        tile[50].image = loadImage("res/tiles/Soda_fridge2.png");
+        tile[50].collision = true;
+
+        tile[51] = new Tile();
+        tile[51].image = loadImage("res/tiles/stall_wall2.png");
+        tile[51].collision = true;
+
+        tile[52] = new Tile();
+        tile[52].image = loadImage("res/tiles/stall_table2.png");
+        tile[52].collision = true;
+
+        tile[53] = new Tile();
+        tile[53].image = loadImage("res/tiles/coffee_machine.png");
+        tile[53].collision = true;
+
+        tile[54] = new Tile();
+        tile[54].image = loadImage("res/tiles/egg_pan_fryer.png");
+        tile[54].collision = true;
+    }
+
+    private String readNextNonEmptyLine(BufferedReader br) throws IOException {
+        String line;
+        while ((line = br.readLine()) != null) {
+            line = line.trim();
+            if (!line.isEmpty()) {
+                return line;
+            }
+        }
+        return null;
     }
 
     private void loadWorldMap(String filePath) {
@@ -259,12 +334,12 @@ public class TileManager {
             int col = 0;
             int row = 0;
             while (col < gp.maxWorldCol && row < gp.maxWorldRow) {
-                String line = br.readLine();
+                String line = readNextNonEmptyLine(br);
                 if (line == null) {
                     break;
                 }
                 while (col < gp.maxWorldCol) {
-                    String[] numbers = line.split(" ");
+                    String[] numbers = line.split("\\s+");
                     if (col < numbers.length) {
                         int num = Integer.parseInt(numbers[col]);
                         mapTileNum[col][row] = num;
@@ -294,12 +369,12 @@ public class TileManager {
             int col = 0;
             int row = 0;
             while (col < stallMapCol && row < stallMapRow) {
-                String line = br.readLine();
+                String line = readNextNonEmptyLine(br);
                 if (line == null) {
                     break;
                 }
                 while (col < stallMapCol) {
-                    String[] numbers = line.split(" ");
+                    String[] numbers = line.split("\\s+");
                     if (col < numbers.length) {
                         int num = Integer.parseInt(numbers[col]);
                         stallTileNum[col][row] = num;
@@ -329,12 +404,12 @@ public class TileManager {
             int col = 0;
             int row = 0;
             while (col < truckMapCol && row < truckMapRow) {
-                String line = br.readLine();
+                String line = readNextNonEmptyLine(br);
                 if (line == null) {
                     break;
                 }
                 while (col < truckMapCol) {
-                    String[] numbers = line.split(" ");
+                    String[] numbers = line.split("\\s+");
                     if (col < numbers.length) {
                         int num = Integer.parseInt(numbers[col]);
                         truckTileNum[col][row] = num;
@@ -366,7 +441,7 @@ public class TileManager {
             int col = 0;
             int row = 0;
             while (col < interiorCols && row < interiorRows) {
-                String line = br.readLine();
+                String line = readNextNonEmptyLine(br);
                 if (line == null) {
                     break;
                 }
@@ -392,7 +467,8 @@ public class TileManager {
     public void loadInterior() {
         if (gp.Current_level == 1) {
             loadStallInterior();
-        } else if (gp.Current_level == 2) {
+        } else if (gp.Current_level >= 2) {
+            // Level 2 and 3 both use truck interiors
             loadTruckInterior();
         }
     }
@@ -500,68 +576,106 @@ public class TileManager {
         int stallCol = 0;
         int stallRow = 0;
 
-        if (gp.Current_level == 1) {
-            while (stallCol < stallMapCol && stallRow < stallMapRow) {
-                int stallNum = stallTileNum[stallCol][stallRow];
+        switch (gp.Current_level) {
+            case 1 -> {
+                while (stallCol < stallMapCol && stallRow < stallMapRow) {
+                    int stallNum = stallTileNum[stallCol][stallRow];
 
-                if (stallNum != 0) {
-                    int stallWorldX = stallCol * stallTileSize;
-                    int stallWorldY = stallRow * stallTileSize;
-                    int stallScreenX = stallWorldX - gp.player.worldX + gp.player.screenX;
-                    int stallScreenY = stallWorldY - gp.player.worldY + gp.player.screenY;
-                    if (stallScreenX + stallTileSize > 0 && stallScreenX < gp.screenWidth
-                            && stallScreenY + stallTileSize > 0 && stallScreenY < gp.screenHeight) {
-                        for (int i = 0; i < 4; i++) {
-                            for (int j = 0; j < 4; j++) {
-                                int bgTileX = stallCol * 4 + i;
-                                int bgTileY = stallRow * 4 + j;
-                                if (bgTileX < gp.maxWorldCol && bgTileY < gp.maxWorldRow) {
-                                    int bgTileNum = mapTileNum[bgTileX][bgTileY];
-                                    int bgScreenX = (stallCol * stallTileSize + i * gp.tileSize) - gp.player.worldX + gp.player.screenX;
-                                    int bgScreenY = (stallRow * stallTileSize + j * gp.tileSize) - gp.player.worldY + gp.player.screenY;
-                                    g2.drawImage(tile[bgTileNum].image, bgScreenX, bgScreenY, gp.tileSize, gp.tileSize, null);
+                    if (stallNum != 0) {
+                        int stallWorldX = stallCol * stallTileSize;
+                        int stallWorldY = stallRow * stallTileSize;
+                        int stallScreenX = stallWorldX - gp.player.worldX + gp.player.screenX;
+                        int stallScreenY = stallWorldY - gp.player.worldY + gp.player.screenY;
+                        if (stallScreenX + stallTileSize > 0 && stallScreenX < gp.screenWidth
+                                && stallScreenY + stallTileSize > 0 && stallScreenY < gp.screenHeight) {
+                            for (int i = 0; i < 4; i++) {
+                                for (int j = 0; j < 4; j++) {
+                                    int bgTileX = stallCol * 4 + i;
+                                    int bgTileY = stallRow * 4 + j;
+                                    if (bgTileX < gp.maxWorldCol && bgTileY < gp.maxWorldRow) {
+                                        int bgTileNum = mapTileNum[bgTileX][bgTileY];
+                                        int bgScreenX = (stallCol * stallTileSize + i * gp.tileSize) - gp.player.worldX + gp.player.screenX;
+                                        int bgScreenY = (stallRow * stallTileSize + j * gp.tileSize) - gp.player.worldY + gp.player.screenY;
+                                        g2.drawImage(tile[bgTileNum].image, bgScreenX, bgScreenY, gp.tileSize, gp.tileSize, null);
+                                    }
                                 }
                             }
+                            g2.drawImage(tile[stallNum].image, stallScreenX, stallScreenY, stallTileSize, stallTileSize, null);
                         }
-                        g2.drawImage(tile[stallNum].image, stallScreenX, stallScreenY, stallTileSize, stallTileSize, null);
+                    }
+                    stallCol++;
+                    if (stallCol == stallMapCol) {
+                        stallCol = 0;
+                        stallRow++;
                     }
                 }
-                stallCol++;
-                if (stallCol == stallMapCol) {
-                    stallCol = 0;
-                    stallRow++;
-                }
+                break;
             }
-        } else if (gp.Current_level == 2) {
-            while (stallCol < truckMapCol && stallRow < truckMapRow) {
-                int truckNum = truckTileNum[stallCol][stallRow];
+            case 2 -> {
+                while (stallCol < truckMapCol && stallRow < truckMapRow) {
+                    int truckNum = truckTileNum[stallCol][stallRow];
 
-                if (truckNum != 0) {
-                    int truckWorldX = stallCol * truckTileSize;
-                    int truckWorldY = stallRow * truckTileSize;
-                    int truckScreenX = truckWorldX - gp.player.worldX + gp.player.screenX;
-                    int truckScreenY = truckWorldY - gp.player.worldY + gp.player.screenY;
-                    if (truckScreenX + truckTileSize > 0 && truckScreenX < gp.screenWidth
-                            && truckScreenY + truckTileSize > 0 && truckScreenY < gp.screenHeight) {
-                        for (int i = 0; i < 4; i++) {
-                            for (int j = 0; j < 4; j++) {
-                                int bgTileX = stallCol * 4 + i;
-                                int bgTileY = stallRow * 4 + j;
-                                if (bgTileX < gp.maxWorldCol && bgTileY < gp.maxWorldRow) {
-                                    int bgTileNum = mapTileNum[bgTileX][bgTileY];
-                                    int bgScreenX = (stallCol * truckTileSize + i * gp.tileSize) - gp.player.worldX + gp.player.screenX;
-                                    int bgScreenY = (stallRow * truckTileSize + j * gp.tileSize) - gp.player.worldY + gp.player.screenY;
-                                    g2.drawImage(tile[bgTileNum].image, bgScreenX, bgScreenY, gp.tileSize, gp.tileSize, null);
+                    if (truckNum != 0) {
+                        int truckWorldX = stallCol * truckTileSize;
+                        int truckWorldY = stallRow * truckTileSize;
+                        int truckScreenX = truckWorldX - gp.player.worldX + gp.player.screenX;
+                        int truckScreenY = truckWorldY - gp.player.worldY + gp.player.screenY;
+                        if (truckScreenX + truckTileSize > 0 && truckScreenX < gp.screenWidth
+                                && truckScreenY + truckTileSize > 0 && truckScreenY < gp.screenHeight) {
+                            for (int i = 0; i < 4; i++) {
+                                for (int j = 0; j < 4; j++) {
+                                    int bgTileX = stallCol * 4 + i;
+                                    int bgTileY = stallRow * 4 + j;
+                                    if (bgTileX < gp.maxWorldCol && bgTileY < gp.maxWorldRow) {
+                                        int bgTileNum = mapTileNum[bgTileX][bgTileY];
+                                        int bgScreenX = (stallCol * truckTileSize + i * gp.tileSize) - gp.player.worldX + gp.player.screenX;
+                                        int bgScreenY = (stallRow * truckTileSize + j * gp.tileSize) - gp.player.worldY + gp.player.screenY;
+                                        g2.drawImage(tile[bgTileNum].image, bgScreenX, bgScreenY, gp.tileSize, gp.tileSize, null);
+                                    }
                                 }
                             }
+                            g2.drawImage(tile[truckNum].image, truckScreenX, truckScreenY, truckTileSize, truckTileSize, null);
                         }
-                        g2.drawImage(tile[truckNum].image, truckScreenX, truckScreenY, truckTileSize, truckTileSize, null);
+                    }
+                    stallCol++;
+                    if (stallCol == truckMapCol) {
+                        stallCol = 0;
+                        stallRow++;
                     }
                 }
-                stallCol++;
-                if (stallCol == truckMapCol) {
-                    stallCol = 0;
-                    stallRow++;
+                break;
+            }
+            case 3 -> {
+                while (stallCol < truckMapCol && stallRow < truckMapRow) {
+                    int truckNum = truckTileNum[stallCol][stallRow];
+
+                    if (truckNum != 0) {
+                        int truckWorldX = stallCol * truckTileSize;
+                        int truckWorldY = stallRow * truckTileSize;
+                        int truckScreenX = truckWorldX - gp.player.worldX + gp.player.screenX;
+                        int truckScreenY = truckWorldY - gp.player.worldY + gp.player.screenY;
+                        if (truckScreenX + truckTileSize > 0 && truckScreenX < gp.screenWidth
+                                && truckScreenY + truckTileSize > 0 && truckScreenY < gp.screenHeight) {
+                            for (int i = 0; i < 4; i++) {
+                                for (int j = 0; j < 4; j++) {
+                                    int bgTileX = stallCol * 4 + i;
+                                    int bgTileY = stallRow * 4 + j;
+                                    if (bgTileX < gp.maxWorldCol && bgTileY < gp.maxWorldRow) {
+                                        int bgTileNum = mapTileNum[bgTileX][bgTileY];
+                                        int bgScreenX = (stallCol * truckTileSize + i * gp.tileSize) - gp.player.worldX + gp.player.screenX;
+                                        int bgScreenY = (stallRow * truckTileSize + j * gp.tileSize) - gp.player.worldY + gp.player.screenY;
+                                        g2.drawImage(tile[bgTileNum].image, bgScreenX, bgScreenY, gp.tileSize, gp.tileSize, null);
+                                    }
+                                }
+                            }
+                            g2.drawImage(tile[truckNum].image, truckScreenX, truckScreenY, truckTileSize, truckTileSize, null);
+                        }
+                    }
+                    stallCol++;
+                    if (stallCol == truckMapCol) {
+                        stallCol = 0;
+                        stallRow++;
+                    }
                 }
             }
         }

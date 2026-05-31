@@ -2,7 +2,7 @@ package main;
 
 public class Inventory {
 
-    public static final String[] INVENTORY = {"Raw Meat", "Buns", "Ice", "Potatoes", "Milk", "Milk Shake Flavors", "Burgers", "Fries", "Milk Shakes", "Ice Creams", "Kernels", "Popcorn", "Cans", "Soda"};
+    public static final String[] INVENTORY = {"Raw Meat", "Buns", "Ice", "Potatoes", "Milk", "Milk Shake Flavors", "Burgers", "Fries", "Milk Shakes", "Ice Creams", "Kernels", "Popcorn", "Cans", "Soda", "Coffee Beans", "Eggs", "Coffee", "Omelet"};
 
     // Max the player can carry per item
     public static final int PLAYER_CAP = 100;
@@ -22,6 +22,7 @@ public class Inventory {
     public Inventory() {
         for (int i = 0; i < INVENTORY.length; i++) {
             stallItems[i] = 1000;
+            playerItems[i] = 100;
         }
     }
 

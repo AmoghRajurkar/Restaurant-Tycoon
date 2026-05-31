@@ -5,7 +5,9 @@ public class Cook {
     public int cookTime;
     public int foodIndex; // Index of the item being cooked in the inventory
     public int ingredient1Index; // Index of the first ingredient in the inventory
+    public int ingredient1Amount = 1; // Amount of ingredient1 required
     public int ingredient2Index = -1; // Index of the second ingredient in the inventory (for burgers and milkshakes)
+    public int ingredient2Amount = 1; // Amount of ingredient2 required
     public static int price = 0;
     public static boolean cooking = false;
     public static long cookingStartTime = 0;
@@ -60,6 +62,7 @@ public class Cook {
                 cookTime = 3;
                 foodIndex = 11; // Popcorn
                 ingredient1Index = 10; // Kernels
+                ingredient1Amount = 2;
                 price = 10;
                 break;
             }
@@ -68,6 +71,22 @@ public class Cook {
                 foodIndex = 13; // Soda
                 ingredient1Index = 12; // Cans
                 price = 12;
+                break;
+            }
+            case "Coffee" -> {
+                cookTime = 4;
+                foodIndex = 16; // Coffee
+                ingredient1Index = 14; // Coffee Beans
+                ingredient1Amount = 3;
+                price = 18;
+                break;
+            }
+            case "Omelet" -> {
+                cookTime = 4;
+                foodIndex = 17; // Omelet
+                ingredient1Index = 15; // Eggs
+                ingredient1Amount = 2;
+                price = 20;
                 break;
             }
         }
@@ -105,9 +124,9 @@ public class Cook {
                     Thread.sleep(100); // Sleep for a short time to prevent busy waiting
                 }
                 Inventory.giveToPlayer(foodIndex, 1); // Add the cooked item to the player's inventory
-                Inventory.takeFromPlayer(ingredient1Index, 1); // Remove the first ingredient from the player's inventory
+                Inventory.takeFromPlayer(ingredient1Index, ingredient1Amount); // Remove the first ingredient from the player's inventory
                 if (ingredient2Index != -1) {
-                    Inventory.takeFromPlayer(ingredient2Index, 1); // Remove the second ingredient if it exists
+                    Inventory.takeFromPlayer(ingredient2Index, ingredient2Amount); // Remove the second ingredient if it exists
                 }
                 cooking = false;
                 currentCookItem = "";
@@ -124,8 +143,8 @@ public class Cook {
      */
     public boolean canCook() {
         // Check if the player has the necessary ingredients to cook the item
-        boolean hasIngredient1 = Inventory.playerItems[ingredient1Index] > 0;
-        boolean hasIngredient2 = ingredient2Index == -1 || Inventory.playerItems[ingredient2Index] > 0; // If there's a second ingredient, check for it
+        boolean hasIngredient1 = Inventory.playerItems[ingredient1Index] >= ingredient1Amount;
+        boolean hasIngredient2 = ingredient2Index == -1 || Inventory.playerItems[ingredient2Index] >= ingredient2Amount; // If there's a second ingredient, check for it
 
         return hasIngredient1 && hasIngredient2;
     }

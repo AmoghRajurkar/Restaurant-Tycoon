@@ -18,9 +18,9 @@ public class RestockPanel {
     private static final int SCREEN_H = 960;
 
     // Indices into Inventory.INVENTORY that the player is allowed to purchase.
-    // Ignores burgers, fries, milk shakes, icecreams and money
-    private static final int[] Buyable_items = {0, 1, 2, 3, 4, 5, 10, 12};
-    private static final int MAX_VISIBLE_ROWS = 6;
+    // Ignores burgers, fries, milk shakes, ice creams and money
+    private static final int[] Buyable_items = {0, 1, 2, 3, 4, 5, 10, 12, 14, 15};
+    private static final int MAX_VISIBLE_ROWS = 8;
 
     public boolean visible = true;
     private int selectedIndex = 0; // index into Buyable_items, not INVENTORY

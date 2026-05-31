@@ -96,8 +96,8 @@ public class CollisionChecker {
                     }
                 }
             }
-        } else if (gp.Current_level == 2) {
-            // Check collision with truck tiles in level 2
+        } else if (gp.Current_level >= 2) {
+            // Check collision with truck tiles in level 2 and 3
             switch (entity.direction) {
                 case "up" -> {
                     buildingTopRow = (entityTopWorldY - entity.speed) / gp.stallTileSize;
@@ -171,6 +171,70 @@ public class CollisionChecker {
                 if (gp.tileM.tile[tileNum1].collision || gp.tileM.tile[tileNum2].collision) {
                     entity.collisionOn = true;
                 }
+            }
+        }
+
+        // If playing level 3, some station tiles exist in the world layer (worldmap3).
+        // Detect contact with those station tiles and trigger cooking just like interior stations.
+        if (gp.Current_level == 3) {
+            boolean stationFound = false;
+            int wtile1, wtile2;
+            switch (entity.direction) {
+                case "up" -> {
+                    int topRow = (entityTopWorldY - entity.speed) / gp.tileSize;
+                    if (topRow >= 0) {
+                        wtile1 = gp.tileM.mapTileNum[entityLeftCol][topRow];
+                        wtile2 = gp.tileM.mapTileNum[entityRightCol][topRow];
+                        String s1 = getStationName(wtile1);
+                        String s2 = getStationName(wtile2);
+                        if (!s1.isEmpty() || !s2.isEmpty()) {
+                            stationFound = true;
+                            checkStationContact(wtile1 != 0 ? wtile1 : wtile2);
+                        }
+                    }
+                }
+                case "down" -> {
+                    int bottomRow = (entityBottomWorldY + entity.speed) / gp.tileSize;
+                    if (bottomRow < gp.maxWorldRow) {
+                        wtile1 = gp.tileM.mapTileNum[entityLeftCol][bottomRow];
+                        wtile2 = gp.tileM.mapTileNum[entityRightCol][bottomRow];
+                        String s1 = getStationName(wtile1);
+                        String s2 = getStationName(wtile2);
+                        if (!s1.isEmpty() || !s2.isEmpty()) {
+                            stationFound = true;
+                            checkStationContact(wtile1 != 0 ? wtile1 : wtile2);
+                        }
+                    }
+                }
+                case "left" -> {
+                    int leftCol = (entityLeftWorldX - entity.speed) / gp.tileSize;
+                    if (leftCol >= 0) {
+                        wtile1 = gp.tileM.mapTileNum[leftCol][entityTopRow];
+                        wtile2 = gp.tileM.mapTileNum[leftCol][entityBottomRow];
+                        String s1 = getStationName(wtile1);
+                        String s2 = getStationName(wtile2);
+                        if (!s1.isEmpty() || !s2.isEmpty()) {
+                            stationFound = true;
+                            checkStationContact(wtile1 != 0 ? wtile1 : wtile2);
+                        }
+                    }
+                }
+                case "right" -> {
+                    int rightCol = (entityRightWorldX + entity.speed) / gp.tileSize;
+                    if (rightCol < gp.maxWorldCol) {
+                        wtile1 = gp.tileM.mapTileNum[rightCol][entityTopRow];
+                        wtile2 = gp.tileM.mapTileNum[rightCol][entityBottomRow];
+                        String s1 = getStationName(wtile1);
+                        String s2 = getStationName(wtile2);
+                        if (!s1.isEmpty() || !s2.isEmpty()) {
+                            stationFound = true;
+                            checkStationContact(wtile1 != 0 ? wtile1 : wtile2);
+                        }
+                    }
+                }
+            }
+            if (!stationFound) {
+                lastStation = "";
             }
         }
     }
@@ -311,6 +375,14 @@ public class CollisionChecker {
                 Cook cook = new Cook("Soda", gp);
                 cook.startCooking();
             }
+            case "coffee machine" -> {
+                Cook cook = new Cook("Coffee", gp);
+                cook.startCooking();
+            }
+            case "egg pan fryer" -> {
+                Cook cook = new Cook("Omelet", gp);
+                cook.startCooking();
+            }
         }
     }
 
@@ -326,18 +398,22 @@ public class CollisionChecker {
      */
     private String getStationName(int tileNum) {
         return switch (tileNum) {
-            case 11, 12, 13, 14, 15, 16 ->
+            case 11, 12, 13, 14, 15, 16, 40, 41, 42, 43, 44, 45 ->
                 "grill";
-            case 17 ->
+            case 17, 46 ->
                 "ice cream fridge";
-            case 18 ->
+            case 18, 47 ->
                 "milkshake table";
-            case 19 ->
+            case 19, 48 ->
                 "fryer";
-            case 35 ->
+            case 35, 49 ->
                 "popcorn machine";
-            case 37 ->
+            case 37, 50 ->
                 "soda fridge";
+            case 53 ->
+                "coffee machine";
+            case 54 ->
+                "egg pan fryer";
             default ->
                 "";
         };
