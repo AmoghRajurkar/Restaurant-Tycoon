@@ -1,0 +1,32 @@
+        try {
+            InputStream is = getClass().getResourceAsStream(filePath);
+            BufferedReader br;
+            if (is != null) {
+                br = new BufferedReader(new InputStreamReader(is));
+            } else {
+                br = new BufferedReader(new java.io.FileReader(filePath.substring(1)));
+            }
+            int col = 0;
+            int row = 0;
+            while (col < truckMapCol && row < truckMapRow) {
+                String line = br.readLine();
+                if (line == null) {
+                    break;
+                }
+                while (col < truckMapCol) {
+                    String[] numbers = line.split(" ");
+                    if (col < numbers.length) {
+                        int num = Integer.parseInt(numbers[col]);
+                        truckTileNum[col][row] = num;
+                    }
+                    col++;
+                }
+                if (col == truckMapCol) {
+                    col = 0;
+                    row++;
+                }
+            }
+            br.close();
+        } catch (IOException e) {
+            System.err.println("Error reading trucks file '" + filePath + "': " + e.getMessage());
+        }
