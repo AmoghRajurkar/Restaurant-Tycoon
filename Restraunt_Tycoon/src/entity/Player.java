@@ -78,12 +78,21 @@ public class Player extends Entity {
         // Update game state logic
         isMoving = false;
 
+        // Ensure we always update world collision/contact each frame so the
+        // per-frame contactStall and contactTruck variables are correct even
+        // when the player is standing still
+        if (gp.gameState.equals(gp.WORLD_STATE)) {
+            gp.cChecker.checkTile(this);
+        }
+
         // Check for interaction key press to enter stall or truck, only if we're in the world and standing next to one
         if (keyH.interactPressed && gp.gameState.equals(gp.WORLD_STATE)) {
-            if (gp.Current_level == 1 && !CollisionChecker.lastContactStall.equals("")) {
+            // Use the instantaneous contact variables (reset each frame) to
+            // avoid opening a room based on stale `lastContact*` values.
+            if (gp.Current_level == 1 && !CollisionChecker.contactStall.equals("")) {
                 enterRoom("stall");
                 keyH.interactPressed = false;
-            } else if (gp.Current_level >= 2 && !CollisionChecker.lastContactTruck.equals("")) {
+            } else if (gp.Current_level >= 2 && !CollisionChecker.contactTruck.equals("")) {
                 // Treat level 2+ as truck levels (includes level 3 fallback)
                 enterRoom("truck");
                 keyH.interactPressed = false;
@@ -309,8 +318,14 @@ public class Player extends Entity {
         gp.gameState = gp.WORLD_STATE;
         gp.restockPanel.typingMode = false;
         gp.keyH.typingMode = false;
+        // Clear contact tracking so the interact key cannot re-open a room
         CollisionChecker.lastContactStall = "";
         CollisionChecker.lastContactTruck = "";
+        CollisionChecker.contactStall = "";
+        CollisionChecker.contactTruck = "";
+        // Clear the currently loaded interior map to avoid stale state
+        gp.tileM.clearCurrentInterior();
+        gp.currentStallType = "";
         gp.repaint();
     }
 

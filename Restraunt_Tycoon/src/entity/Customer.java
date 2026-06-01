@@ -18,17 +18,23 @@ public class Customer extends Entity {
     public int stall2Y = 1010;// Y position of the second stall, which can be used for determining the customer's path to the stall
     public int animationThreshold; // Variable to control the speed of the walking animation, which can be adjusted based on boost status
     public Random rand = new Random();// Random number generator to determine the customer's path and behavior
-    public int InPath = rand.nextInt(2) + 1; // Randomly choose a path to come in for the customer to take (1 or 2)
+    public int InPath = rand.nextInt(3) + 1; // Randomly choose a path to come in for the customer to take (1 through 3)
     public boolean isServed = false; // Flag to indicate whether the customer has been served or not
     public int outPath = InPath; // Out path is based on in path
     public boolean leftMap = false; // Flag to indicate whether the customer has left the map or not
 
-    /** 
-     * Constructor for the Customer class, which initializes the customer's position, speed, direction, and collision area. It also loads the customer's images for different directions and animations. 
-     * @param gp The Gamepanel object, which provides access to the game environment and resources
-     * @param x The initial X position of the customer in the world, which can be used for determining the customer's starting point and movement
-     * @param y The initial Y position of the customer in the world, which can be used for determining the customer's starting point and movement 
-    */
+    /**
+     * Constructor for the Customer class, which initializes the customer's
+     * position, speed, direction, and collision area. It also loads the
+     * customer's images for different directions and animations.
+     *
+     * @param gp The Gamepanel object, which provides access to the game
+     * environment and resources
+     * @param x The initial X position of the customer in the world, which can
+     * be used for determining the customer's starting point and movement
+     * @param y The initial Y position of the customer in the world, which can
+     * be used for determining the customer's starting point and movement
+     */
     public Customer(Gamepanel gp, int x, int y) {
         super(gp);
         direction = "up";
@@ -45,13 +51,14 @@ public class Customer extends Entity {
         getCustomerImage();
     }
 
-
-
     /**
-     * Method to load the customer's images for different directions and animations, which can be used for rendering the customer in the game. 
-     * The method uses ImageIO to read the image files from the specified paths and assigns them to the corresponding variables for each direction
-     * and animation state. If there is an error loading the images, it catches the IOException and prints an error message.
-     */ 
+     * Method to load the customer's images for different directions and
+     * animations, which can be used for rendering the customer in the game. The
+     * method uses ImageIO to read the image files from the specified paths and
+     * assigns them to the corresponding variables for each direction and
+     * animation state. If there is an error loading the images, it catches the
+     * IOException and prints an error message.
+     */
     private void getCustomerImage() {
         // Load customer images for different directions and animations
         try {
@@ -71,88 +78,223 @@ public class Customer extends Entity {
             System.out.println("Error loading customer images");
         }
     }
+
     /**
-     * Method to determine the customer's path to the stall based on the randomly chosen InPath variable. The method checks the customer's current position 
-     * in the world and updates the direction accordingly to guide the customer towards the stall. It also calls the update() method to update the customer's
-     * position and behavior based on the chosen InPath. The method handles two different paths for the customer to take, depending on whether InPath is 1 or 2,
-     * and adjusts the direction and movement accordingly to ensure that the customer reaches the stall successfully.
+     * Method to determine the customer's path to the stall based on the
+     * randomly chosen InPath variable. The method checks the customer's current
+     * position in the world and updates the direction accordingly to guide the
+     * customer towards the stall. It also calls the update() method to update
+     * the customer's position and behavior based on the chosen InPath. The
+     * method handles two different paths for the customer to take, depending on
+     * whether InPath is 1 or 2, and adjusts the direction and movement
+     * accordingly to ensure that the customer reaches the stall successfully.
      */
     public void InPath() {
+        switch (gp.Current_level) {
+            case 2 ->
+                inPathLevel2();
+            case 3 ->
+                inPathLevel3();
+            default ->
+                inPathLevel1();
+        }
+    }
+
+    private void inPathLevel1() {
+        if (InPath == 3) InPath = rand.nextInt(2) + 1; // If InPath is 3, randomly choose between path 1 and 2 to ensure customers only come in from the two main paths
         if (InPath == 1) {
             if (worldY > stall1Y) {
                 direction = "up";
-                update(); // Update the customer's position and behavior based on the chosen InPath
-
+                update();
             } else if (worldX > stall1X) {
                 direction = "left";
-                update(); // Update the customer's position and behavior based on the chosen InPath
-
+                update();
             }
-
         }
         if (InPath == 2) {
             if (worldY > 1300) {
                 direction = "up";
-                update(); // Update the customer's position and behavior based on the chosen InPath
+                update();
             } else if (worldX < 2000) {
                 direction = "right";
-                update(); // Update the customer's position and behavior based on the chosen InPath
+                update();
             } else if (worldY > stall2Y) {
                 direction = "up";
-                update(); // Update the customer's position and behavior based on the chosen InPath
+                update();
             } else if (worldX < stall2X) {
                 direction = "right";
-                update(); // Update the customer's position and behavior based on the chosen InPath
+                update();
             }
         }
     }
-    /**
-     * Method to determine the customer's path out of the map after being served, based on the randomly chosen InPath variable. 
-     * The method checks the customer's current position in the world and updates the direction accordingly to guide the customer 
-     * towards the exit. It also calls the update() method to update the customer's position and behavior based on the chosen InPath. 
-     * The method handles two different paths for the customer to take, depending on whether InPath is 1 or 2, and adjusts the direction 
-     * and movement accordingly to ensure that the customer leaves the map successfully after being served.
-     */
+
+    private void inPathLevel2() {
+        if (InPath == 1) {
+            if (worldY > gp.tileSize * 28 - 40) {
+                direction = "up";
+                update();
+            } else if (worldX < gp.tileSize * 15) {
+                direction = "right";
+                update();
+            }
+        }
+        if (InPath == 2) {
+            if (worldY > gp.tileSize * 29 - 40) {
+                direction = "up";
+                update();
+            } else if (worldX < gp.tileSize * 27) {
+                direction = "right";
+                update();
+            } else if (worldY > gp.tileSize * 28 - 40) {
+                direction = "up";
+                update();
+            } else if (worldX < gp.tileSize * 31) {
+                direction = "right";
+                update();
+            }
+        }
+        if (InPath == 3) {
+            if (worldY > gp.tileSize * 30 - 40) {
+                direction = "up";
+                update();
+            } else if (worldX < gp.tileSize * 43) {
+                direction = "right";
+                update();
+            } else if (worldY > gp.tileSize * 28 - 40) {
+                direction = "up";
+                update();
+            } else if (worldX < gp.tileSize * 47) {
+                direction = "right";
+                update();
+            }
+        }
+    }
+
+    private void inPathLevel3() {
+        if (InPath == 1) {
+            if (worldY > gp.tileSize * 34) {
+                direction = "up";
+                update();
+            } else if (worldX < gp.tileSize * 40) {
+                direction = "right";
+                update();
+            } else if (worldY > gp.tileSize * 25) {
+                direction = "up";
+                update();
+            }
+        }
+        if (InPath == 2) {
+            if (worldY > gp.tileSize * 34) {
+                direction = "up";
+                update();
+            } else if (worldX < gp.tileSize * 41) {
+                direction = "right";
+                update();
+            } else if (worldY > gp.tileSize * 25) {
+                direction = "up";
+                update();
+            }
+        }
+        if (InPath == 3) {
+            if (worldY > gp.tileSize * 34) {
+                direction = "up";
+                update();
+            } else if (worldX < gp.tileSize * 42) {
+                direction = "right";
+                update();
+            } else if (worldY > gp.tileSize * 25) {
+                direction = "up";
+                update();
+            }
+        }
+    }
+
     public void outPath() {
+        switch (gp.Current_level) {
+            case 2 ->
+                outPathLevel2();
+            case 3 ->
+                outPathLevel3();
+            default ->
+                outPathLevel1();
+        }
+    }
+
+    private void outPathLevel1() {
         if (InPath == 1) {
             if (worldX > 700) {
                 direction = "left";
-                
-            }
-            else {
+            } else {
                 direction = "up";
-                
             }
             if (worldY < 20) {
                 leftMap = true;
             }
-            update(); // Update the customer's position and behavior based on the chosen InPath
-
-        }
-        if (InPath == 2) {
+            update();
+        } else if (InPath == 2) {
             if (worldX < 2300) {
                 direction = "right";
-            }
-            else{
+            } else {
                 direction = "up";
             }
             if (worldY < 20) {
                 leftMap = true;
             }
-            update(); // Update the customer's position and behavior based on the chosen InPath
-
+            update();
         }
-
     }
 
-    
+    private void outPathLevel2() {
+        if (InPath == 1) {
+            if (worldX > 800) {
+                direction = "left";
+            } else {
+                direction = "up";
+            }
+        } else if (InPath == 2) {
+            if (worldX < 2200) {
+                direction = "right";
+            } else {
+                direction = "up";
+            }
+        }
+        if (worldY < 20) {
+            leftMap = true;
+        }
+        update();
+    }
+
+    private void outPathLevel3() {
+        if (InPath == 1) {
+            if (worldX > 900) {
+                direction = "left";
+            } else {
+                direction = "up";
+            }
+        } else if (InPath == 2) {
+            if (worldX < 2400) {
+                direction = "right";
+            } else {
+                direction = "up";
+            }
+        }
+        if (worldY < 20) {
+            leftMap = true;
+        }
+        update();
+    }
+
     /**
-     * Method to update the customer's position and behavior based on the current direction, speed, and collision status. 
-     * The method checks for collisions with tiles and other customers, as well as world boundaries, to determine whether 
-     * the customer can move in the desired direction. If there are no collisions, it updates the customer's position accordingly 
-     * and manages the walking animation by switching between different sprite images based on the SpriteCounter and animationThreshold variables. 
-     * If there is a collision or if the customer is idle, it resets the animation to a still image to ensure a stable appearance when not moving. 
-    */
+     * Method to update the customer's position and behavior based on the
+     * current direction, speed, and collision status. The method checks for
+     * collisions with tiles and other customers, as well as world boundaries,
+     * to determine whether the customer can move in the desired direction. If
+     * there are no collisions, it updates the customer's position accordingly
+     * and manages the walking animation by switching between different sprite
+     * images based on the SpriteCounter and animationThreshold variables. If
+     * there is a collision or if the customer is idle, it resets the animation
+     * to a still image to ensure a stable appearance when not moving.
+     */
     public void update() {
         // Logic to update the customer's position and behavior goes here
         isMoving = false;
@@ -221,14 +363,20 @@ public class Customer extends Entity {
             SpriteNum = 1; // Reset to the first frame so still image is stable
         }
     }
+
     /**
-     * Method to draw the customer on the screen based on the current direction, animation state, 
-     * and position in the world. The method selects the appropriate image to draw based on whether 
-     * the customer is moving or idle, and which direction they are facing. It calculates the drawing 
-     * position on the screen by adjusting the customer's world coordinates relative to the player's position
-     * and screen coordinates. Finally, it uses the Graphics2D object to draw the selected image at the calculated 
+     * Method to draw the customer on the screen based on the current direction,
+     * animation state, and position in the world. The method selects the
+     * appropriate image to draw based on whether the customer is moving or
+     * idle, and which direction they are facing. It calculates the drawing
+     * position on the screen by adjusting the customer's world coordinates
+     * relative to the player's position and screen coordinates. Finally, it
+     * uses the Graphics2D object to draw the selected image at the calculated
      * position with the specified tile size.
-     * @param g2 The Graphics2D object used for drawing the customer on the screen, which provides methods for rendering images and shapes in the game
+     *
+     * @param g2 The Graphics2D object used for drawing the customer on the
+     * screen, which provides methods for rendering images and shapes in the
+     * game
      */
     public void draw(Graphics2D g2) {
         BufferedImage image = null; // Variable to hold the current image to be drawn based on the player's direction and animation state

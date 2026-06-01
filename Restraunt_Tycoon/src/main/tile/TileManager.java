@@ -495,6 +495,16 @@ public class TileManager {
         }
     }
 
+    /**
+     * Clears any currently loaded interior and resets the last-handled markers.
+     * Call this when exiting an interior so stale state doesn't persist.
+     */
+    public void clearCurrentInterior() {
+        currentStallMap = null;
+        lastHandledStall = "";
+        lastHandledTruck = "";
+    }
+
     // Checks if the player has just entered a stall, and if so loads the corresponding interior map
     private void loadStallInterior() {
         String current = CollisionChecker.lastContactStall;

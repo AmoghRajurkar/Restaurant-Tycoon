@@ -30,7 +30,7 @@ public class Gamepanel extends JPanel implements Runnable {
     public Customer[] customers;
     public int customersIndex = 0;
     private long lastCustomerSpawnTime = System.currentTimeMillis();
-    private final long customerSpawnInterval = 15000; // 15 seconds in milliseconds
+    private final long customerSpawnInterval = 5000; // 15 seconds in milliseconds
     private final int maxCustomers = 8; // Set a reasonable max
 
     // World settings
@@ -136,28 +136,10 @@ public class Gamepanel extends JPanel implements Runnable {
 
         if (Current_level == 3 && level3RestockZone) {
             updateRestockPanel();
-        } else if (Current_level == 1 && gameState.equals(WORLD_STATE)) {
-            // Update all customers
-            for (int i = 0; i < customers.length; i++) {
-                Customer customer = customers[i];
-                if (customer == null) {
-                    continue;
-                }
-                if (!customer.isServed) {
-                    customer.InPath();
-                }
-                if (customer.isServed) {
-                    customer.outPath();
-                    if (customer.leftMap) {
-                        customers[i] = null; // Remove customer from array once they have left the map
-                        customersIndex--;
-                        continue;
-                    }
-                }
-                // Always check stall contact each frame even if the customer isn't moving
-                cChecker.customerCheckTile(customer);
+        }
 
-            }
+        if (gameState.equals(WORLD_STATE)) {
+            updateCustomers();
 
             long currentTime = System.currentTimeMillis();
             if (currentTime - lastCustomerSpawnTime >= customerSpawnInterval) {
@@ -167,13 +149,49 @@ public class Gamepanel extends JPanel implements Runnable {
         }
     }
 
-    private void spawnCustomer() {
-        if (customersIndex >= customers.length) {
+    private void updateCustomers() {
+        if (customers == null) {
             return;
         }
 
-        int x = tileSize + tileSize * 20;
-        int y = tileSize + tileSize * 43;
+        for (int i = 0; i < customers.length; i++) {
+            Customer customer = customers[i];
+            if (customer == null) {
+                continue;
+            }
+            if (!customer.isServed) {
+                customer.InPath();
+            }
+            if (customer.isServed) {
+                customer.outPath();
+                if (customer.leftMap) {
+                    customers[i] = null;
+                    customersIndex--;
+                    continue;
+                }
+            }
+            // Always check stall contact each frame even if the customer isn't moving
+            cChecker.customerCheckTile(customer);
+        }
+    }
+
+    private void spawnCustomer() {
+        if (customersIndex >= maxCustomers) {
+            return;
+        }
+        ensureCustomersArray();
+
+        int[] spawn = switch (Current_level) {
+            case 2 ->
+                spawnCustomerLevel2();
+            case 3 ->
+                spawnCustomerLevel3();
+            default ->
+                spawnCustomerLevel1();
+        };
+
+        int x = spawn[0];
+        int y = spawn[1];
         for (int i = 0; i < customers.length; i++) {
             if (customers[i] == null) {
                 customers[i] = new Customer(this, x, y);
@@ -181,6 +199,25 @@ public class Gamepanel extends JPanel implements Runnable {
                 break;
             }
         }
+    }
+
+    private void ensureCustomersArray() {
+        if (customers == null) {
+            customers = new Customer[maxCustomers];
+            customersIndex = 0;
+        }
+    }
+
+    private int[] spawnCustomerLevel1() {
+        return new int[]{tileSize + tileSize * 20, tileSize + tileSize * 43};
+    }
+
+    private int[] spawnCustomerLevel2() {
+        return new int[]{tileSize + tileSize * 6, tileSize + tileSize * 36};
+    }
+
+    private int[] spawnCustomerLevel3() {
+        return new int[]{tileSize + tileSize * 1, tileSize + tileSize * 40};
     }
 
     public int countCustomersOutsideStall(String stallType) {
@@ -219,9 +256,11 @@ public class Gamepanel extends JPanel implements Runnable {
                 player.worldX = tileSize * 15;
                 player.worldY = tileSize * 22;
                 gameState = WORLD_STATE;
-                // Clear customers from level 1
-                customers = null;
+                // Reset customers for level 2
+                customers = new Customer[maxCustomers];
                 customersIndex = 0;
+                lastCustomerSpawnTime = System.currentTimeMillis();
+                spawnCustomer();
             } else if (Current_level == 2 && Inventory.playerMoney >= 2500) {
                 Current_level = 3;
                 tileM.reloadLevelMap();
@@ -229,6 +268,11 @@ public class Gamepanel extends JPanel implements Runnable {
                 player.worldX = tileSize * 15;
                 player.worldY = tileSize * 22;
                 gameState = WORLD_STATE;
+                // Reset customers for level 3
+                customers = new Customer[maxCustomers];
+                customersIndex = 0;
+                lastCustomerSpawnTime = System.currentTimeMillis();
+                spawnCustomer();
             }
             SpaceUsed = true;
         }
@@ -435,6 +479,12 @@ public class Gamepanel extends JPanel implements Runnable {
 
         if (gameState.equals(WORLD_STATE)) {
             tileM.draw(g2);
+            if (Current_level == 3) {
+                g2.setColor(new Color(139, 69, 19));
+                int sx = 40 * tileSize - player.worldX + player.screenX;
+                int sy = 25 * tileSize - player.worldY + player.screenY;
+                g2.fillRect(sx, sy, 3 * tileSize, 3 * tileSize);
+            }
             // Draw all customers
             for (int i = 0; i < customersIndex; i++) {
                 if (customers[i] != null) {
@@ -443,13 +493,6 @@ public class Gamepanel extends JPanel implements Runnable {
             }
         } else if (gameState.equals(STALL_STATE)) {
             tileM.drawInterior(g2);
-        }
-
-        if (Current_level == 3 && gameState.equals(WORLD_STATE)) {
-            g2.setColor(new Color(139, 69, 19));
-            int sx = 33 * tileSize - player.worldX + player.screenX;
-            int sy = 17 * tileSize - player.worldY + player.screenY;
-            g2.fillRect(sx, sy, 4 * tileSize, 4 * tileSize);
         }
 
         player.draw(g2);
@@ -470,6 +513,12 @@ public class Gamepanel extends JPanel implements Runnable {
             restockPanel.draw(g2);
         }
 
+        if (Current_level == 3 && gameState.equals(WORLD_STATE)) {
+            g2.setColor(new Color(139, 69, 19));
+            int sx = 33 * tileSize - player.worldX + player.screenX;
+            int sy = 17 * tileSize - player.worldY + player.screenY;
+            g2.fillRect(sx, sy, 4 * tileSize, 4 * tileSize);
+        }
         // Draw inventory panel
         inventoryPanel.draw(g2);
         informationPanel.draw(g2);
