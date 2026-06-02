@@ -21,7 +21,6 @@ public class Customer extends Entity {
     public int InPath = rand.nextInt(3) + 1; // Randomly choose a path to come in for the customer to take (1 through 3)
     public boolean isServed = false; // Flag to indicate whether the customer has been served or not
     public boolean place_order = false; // True once we've placed a level 3 order for this customer
-    public int outPath = InPath; // Out path is based on in path
     public boolean leftMap = false; // Flag to indicate whether the customer has left the map or not
 
     /**
@@ -105,7 +104,8 @@ public class Customer extends Entity {
         if (InPath == 3) {
             InPath = rand.nextInt(2) + 1; // If InPath is 3, randomly choose between path 1 and 2 to ensure customers only come in from the two main paths
 
-                }if (InPath == 1) {
+        }
+        if (InPath == 1) {
             if (worldY > stall1Y) {
                 direction = "up";
                 update();
@@ -234,7 +234,8 @@ public class Customer extends Entity {
                 leftMap = true;
             }
             update();
-        } else if (InPath == 2) {
+        }
+        if (InPath == 2) {
             if (worldX < 2300) {
                 direction = "right";
             } else {
@@ -248,43 +249,23 @@ public class Customer extends Entity {
     }
 
     private void outPathLevel2() {
-        if (InPath == 1) {
-            if (worldX > 800) {
-                direction = "left";
-            } else {
-                direction = "up";
+        if (InPath == 1 || InPath == 2 || InPath == 3) {
+            direction = "down";
+            if (worldY > gp.tileSize * 44) {
+                leftMap = true;
             }
-        } else if (InPath == 2) {
-            if (worldX < 2200) {
-                direction = "right";
-            } else {
-                direction = "up";
-            }
+            update();
         }
-        if (worldY < 20) {
-            leftMap = true;
-        }
-        update();
     }
 
     private void outPathLevel3() {
-        if (InPath == 1) {
-            if (worldX > 900) {
-                direction = "left";
-            } else {
-                direction = "up";
+        if (InPath == 1 || InPath == 2 || InPath == 3) {
+            direction = "up";
+            if (worldY < gp.tileSize) {
+                leftMap = true;
             }
-        } else if (InPath == 2) {
-            if (worldX < 2400) {
-                direction = "right";
-            } else {
-                direction = "up";
-            }
+            update();
         }
-        if (worldY < 20) {
-            leftMap = true;
-        }
-        update();
     }
 
     /**

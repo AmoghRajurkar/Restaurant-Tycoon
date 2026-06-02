@@ -1,5 +1,6 @@
 package main;
 
+import entity.Car;
 import entity.Customer;
 import java.awt.*;
 import java.util.*;
@@ -119,6 +120,10 @@ public class OrderBoard {
                 OrderList order = cars.get(carIndex);
                 if (order.items.isEmpty()) {
                     cars.remove(carIndex);
+                    Car servedCar = gp.getFirstWaitingCar();
+                    if (servedCar != null) {
+                        servedCar.isServed = true;
+                    }
                     carIndex--;
                     continue;
                 }
@@ -144,6 +149,10 @@ public class OrderBoard {
                     gp.inventory.giveMoneyToPlayer(Cook.price);
                     if (order.items.isEmpty()) {
                         cars.remove(carIndex);
+                        Car servedCar = gp.getFirstWaitingCar();
+                        if (servedCar != null) {
+                            servedCar.isServed = true;
+                        }
                     }
                     return;
                 }

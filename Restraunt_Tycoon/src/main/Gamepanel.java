@@ -221,10 +221,7 @@ public class Gamepanel extends JPanel implements Runnable {
                 );
 
                 if (rect.intersects(customerArea) && !customer.place_order && !customer.isServed) {
-                    // Create a level 3 order for this customer. Use "Red" so
-                    // the OrderList will populate with level-3 items.
                     orderBoard.customers.add(new OrderList(3, "Red"));
-                    // Make sure the order board is shown in-world so the player can see the new order
                     orderBoard.visible = true;
                     customer.place_order = true;
                 }
@@ -304,13 +301,18 @@ public class Gamepanel extends JPanel implements Runnable {
             }
 
             // Place the order once the car arrives on the grey 4x4 zone.
+            int rectX = tileSize * 35;
+            int rectY = tileSize * 37;
+            int rectH = tileSize * 4;
+            int rectW = tileSize * 4;
+            Rectangle rect = new Rectangle(rectX, rectY, rectW, rectH);
             Rectangle carArea = new Rectangle(
                     car.worldX + car.solidArea.x,
                     car.worldY + car.solidArea.y,
                     car.solidArea.width,
                     car.solidArea.height
             );
-            if (!car.place_order && !car.isServed && carArea.intersects(carArea)) {
+            if (rect.intersects(carArea) && !car.place_order && !car.isServed) {
                 orderBoard.cars.add(new OrderList(3, "Red"));
                 orderBoard.visible = true;
                 car.place_order = true;
@@ -654,12 +656,12 @@ public class Gamepanel extends JPanel implements Runnable {
         if (gameState.equals(WORLD_STATE)) {
             tileM.draw(g2);
             if (Current_level == 3) {
-                g2.setColor(new Color(139, 69, 19));
+                g2.setColor(new Color(139, 69, 19, 0));
                 int sx = 40 * tileSize - player.worldX + player.screenX;
                 int sy = 25 * tileSize - player.worldY + player.screenY;
                 g2.fillRect(sx, sy, 3 * tileSize, 3 * tileSize);
 
-                g2.setColor(new Color(100, 100, 100));
+                g2.setColor(new Color(100, 100, 100, 0));
                 sx = 35 * tileSize - player.worldX + player.screenX - tileSize;
                 sy = 37 * tileSize - player.worldY + player.screenY - tileSize;
                 g2.fillRect(sx, sy, tileSize * 4, tileSize * 4);
@@ -672,9 +674,9 @@ public class Gamepanel extends JPanel implements Runnable {
             }
             // Draw all cars in the world for level 3
             if (Current_level == 3 && cars != null) {
-                for (int i = 0; i < carsIndex; i++) {
-                    if (cars[i] != null) {
-                        cars[i].draw(g2);
+                for (Car car : cars) {
+                    if (car != null) {
+                        car.draw(g2);
                     }
                 }
             }
@@ -683,7 +685,7 @@ public class Gamepanel extends JPanel implements Runnable {
         }
 
         if (Current_level == 3 && gameState.equals(WORLD_STATE)) {
-            g2.setColor(new Color(139, 69, 19));
+            g2.setColor(new Color(139, 69, 19, 150));
             int sx = 33 * tileSize - player.worldX + player.screenX;
             int sy = 17 * tileSize - player.worldY + player.screenY;
             g2.fillRect(sx, sy, 4 * tileSize, 4 * tileSize);

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Random;
 import javax.imageio.ImageIO;
 import main.Gamepanel;
+import main.OrderList;
 
 // Car entity with movement, spawning, InPath and outPath like Customer.
 // Drawn at 4x tile size with no animation.
@@ -20,6 +21,7 @@ public class Car extends Entity {
     public boolean isServed = false;
     public int outPath = InPath;
     public boolean leftMap = false;
+    public OrderList order;
 
     public Car(Gamepanel gp, int worldX, int worldY) {
         super(gp);
@@ -45,6 +47,7 @@ public class Car extends Entity {
     }
 
     public void InPath() {
+
         if (worldX > gp.tileSize * 34) {
             direction = "left";
             update();
@@ -52,33 +55,40 @@ public class Car extends Entity {
     }
 
     public void outPath() {
-        if (worldX > 0) {
-            direction = "left";
-            update();
-        } else {
+        direction = "left";
+        if (worldX < gp.tileSize * 5) {
             leftMap = true;
         }
+        update();
     }
 
     public void update() {
+        // Logic to update the customer's position and behavior goes here
         isMoving = false;
-        collisionOn = false;
-        gp.cChecker.checkEntityCollision(this, gp.cars); // Avoid other cars
 
-        // World boundaries for cars
+        // Check for collisions with tiles
+        collisionOn = false; // Reset collision flag before checking for collisions
+        gp.cChecker.checkEntityCollision(this, gp.cars); // Check for collisions with other cars
+
+        // Check world boundary — stop the player when the edge of the map would come into view
         if (direction.equals("up") && worldY <= 0) {
             collisionOn = true;
+            SpriteCounter = 0;
         }
-        if (direction.equals("down") && worldY + gp.tileSize * carSize >= gp.worldHeight) {
+        if (direction.equals("down") && worldY + gp.tileSize >= gp.worldHeight) {
             collisionOn = true;
+            SpriteCounter = 0;
         }
         if (direction.equals("left") && worldX <= 0) {
             collisionOn = true;
+            SpriteCounter = 0;
         }
-        if (direction.equals("right") && worldX + gp.tileSize * carSize >= gp.worldWidth) {
+        if (direction.equals("right") && worldX + gp.tileSize >= gp.worldWidth) {
             collisionOn = true;
+            SpriteCounter = 0;
         }
 
+        // If collision is false, customer can move
         if (collisionOn == false) {
             isMoving = true;
             switch (direction) {
