@@ -1,5 +1,6 @@
 package main;
 
+import entity.Car;
 import entity.Customer;
 import java.awt.*;
 import java.util.*;
@@ -64,7 +65,11 @@ public class OrderBoard {
             if (order.items.isEmpty()) {
                 customers.remove(customerIndex);
                 customerIndex--;
-                Customer servedCustomer = gp.getFirstWaitingCustomer(gp.currentStallType);
+                Customer servedCustomer = gp.getFirstWaitingCustomerStall(gp.currentStallType);
+                if (servedCustomer != null) {
+                    servedCustomer.isServed = true;
+                }
+                servedCustomer = gp.getFirstWaitingCustomerTruck(gp.currentStallType);
                 if (servedCustomer != null) {
                     servedCustomer.isServed = true;
                 }
@@ -79,40 +84,69 @@ public class OrderBoard {
                     continue;
                 }
 
-                // Remove one from player inventory and fulfill one unit of this order item
-                gp.inventory.playerItems[invIndex] -= 1;
-                int qty = Integer.parseInt(orderItem[1]) - 1;
-                if (qty <= 0) {
-                    order.items.remove(itemIndex);
-                    gp.inventory.giveMoneyToPlayer(Cook.price); // Give player money for selling the item
-                } else {
-                    orderItem[1] = String.valueOf(qty);
-                    gp.inventory.giveMoneyToPlayer(Cook.price); // Give player money for selling the item
-                }
+                if (gp.Current_level == 3) {
+                    // Check if any waiting cars can be served this item
+                    // For cars
+                    for (Car car : gp.cars) {
+                        if (car.isServed || !car.place_order || !car.isOnDropZone()) {
+                            continue;
+                        }
+                        if (gp.inventory.playerItems[invIndex] <= 0) {
+                            break; // No more of this item to give
+                        }
+                        // Remove one from player inventory and fulfill one unit of this order item
+                        gp.inventory.playerItems[invIndex] -= 1;
+                        int qty = Integer.parseInt(orderItem[1]) - 1;
+                        if (qty <= 0) {
+                            order.items.remove(itemIndex);
+                            gp.inventory.giveMoneyToPlayer(Cook.price); // Give player money for selling the item
+                        } else {
+                            orderItem[1] = String.valueOf(qty);
+                            gp.inventory.giveMoneyToPlayer(Cook.price); // Give player money for selling the item
+                        }
 
-                if (order.items.isEmpty()) {
-                    customers.remove(customerIndex);
-                    Customer servedCustomer = gp.getFirstWaitingCustomer(gp.currentStallType);
-                    if (servedCustomer != null) {
-                        servedCustomer.isServed = true;
+                        car.isServed = true; // Mark the car as served
                     }
                 }
-                return;
+
+                // Remove one from player inventory and fulfill one unit of this order item
+                gp.inventory.playerItems[invIndex] -= 1;
+                    int qty = Integer.parseInt(orderItem[1]) - 1;
+                    if (qty <= 0) {
+                        order.items.remove(itemIndex);
+                        gp.inventory.giveMoneyToPlayer(Cook.price); // Give player money for selling the item
+                    } else {
+                        orderItem[1] = String.valueOf(qty);
+                        gp.inventory.giveMoneyToPlayer(Cook.price); // Give player money for selling the item
+                    }
+
+                    if (order.items.isEmpty()) {
+                        customers.remove(customerIndex);
+                        customerIndex--;
+                        Customer servedCustomer = gp.getFirstWaitingCustomerStall(gp.currentStallType);
+                        if (servedCustomer != null) {
+                            servedCustomer.isServed = true;
+                        }
+                        servedCustomer = gp.getFirstWaitingCustomerTruck(gp.currentStallType);
+                        if (servedCustomer != null) {
+                            servedCustomer.isServed = true;
+                        }
+                    }
+                    return;
+                }
             }
+
+            gp.messages.showMessageForDuration("No available items in inventory to serve any customer.");
         }
-
-        gp.messages.showMessageForDuration("No available items in inventory to serve any customer.");
-    }
-
-    /**
-     * Helper method to convert an item name from the order into the
-     * corresponding index in the player's inventory. It uses a switch statement
-     * to map item names to their respective inventory indices.
-     *
-     * @param name The name of the item to convert
-     * @return The index of the item in the player's inventory, or -1 if not
-     * found
-     */
+        /**
+         * Helper method to convert an item name from the order into the
+         * corresponding index in the player's inventory. It uses a switch
+         * statement to map item names to their respective inventory indices.
+         *
+         * @param name The name of the item to convert
+         * @return The index of the item in the player's inventory, or -1 if not
+         * found
+         */
     private int itemNameToIndex(String name) {
         return switch (name) {
             case "Burger" ->

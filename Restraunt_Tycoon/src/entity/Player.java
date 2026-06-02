@@ -295,6 +295,12 @@ public class Player extends Entity {
         } else if ("truck".equals(roomType)) {
             gp.currentStallType = CollisionChecker.lastContactTruck;
             gp.orderBoard.loadForStall(CollisionChecker.lastContactTruck);
+            int waitingCustomers = gp.countCustomerOutsideTruck(CollisionChecker.lastContactTruck);
+            if (waitingCustomers > 0) {
+                for (int i = 0; i < waitingCustomers; i++) {
+                    gp.orderBoard.customers.add(new OrderList(1, CollisionChecker.lastContactTruck));
+                }
+            }
         }
 
         roomX = gp.screenWidth / 2 - gp.tileSize / 2;

@@ -22,6 +22,7 @@ public class Inventory {
     public Inventory() {
         for (int i = 0; i < INVENTORY.length; i++) {
             stallItems[i] = 1000;
+            playerItems[i] = 100;
         }
     }
 

@@ -1,5 +1,6 @@
 package main;
 
+import entity.Car;
 import entity.Customer;
 import entity.Player;
 import java.awt.*;
@@ -30,8 +31,8 @@ public class Gamepanel extends JPanel implements Runnable {
     public Customer[] customers;
     public int customersIndex = 0;
     private long lastCustomerSpawnTime = System.currentTimeMillis();
-    private final long customerSpawnInterval = 5000; // 15 seconds in milliseconds
-    private final int maxCustomers = 8; // Set a reasonable max
+    private final long customerSpawnInterval = 15000; // 15 seconds in milliseconds
+    private int maxCustomers;
 
     // World settings
     public final int maxWorldCol = 60;
@@ -72,6 +73,11 @@ public class Gamepanel extends JPanel implements Runnable {
     public InformationPanel informationPanel = new InformationPanel();
     public Messages messages;
     public boolean level3RestockZone = false;
+    public Car[] cars;
+    public int carsIndex = 0;
+    private long lastCarSpawnTime = System.currentTimeMillis();
+    private final long carSpawnInterval = 8000; // Spawn a car every 8 seconds in level 3
+    private final int maxCars = 5; // Max cars in level 3
 
     public Gamepanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -82,10 +88,27 @@ public class Gamepanel extends JPanel implements Runnable {
         this.setFocusTraversalKeysEnabled(false);
         this.messages = new Messages("");
 
+        // Initialize max customers based on current level and create initial customers array
+        setMaxCustomersForLevel();
         if (Current_level == 1) {
-            // Initialize customers
-            customers = new Customer[maxCustomers]; // Initialize the customers array with a maximum size
+            customers = new Customer[maxCustomers];
             spawnCustomer();
+        }
+    }
+
+    /**
+     * Set `maxCustomers` according to the current level.
+     */
+    private void setMaxCustomersForLevel() {
+        switch (Current_level) {
+            case 1 ->
+                maxCustomers = 8;
+            case 2 ->
+                maxCustomers = 12;
+            case 3 ->
+                maxCustomers = 15;
+            default ->
+                maxCustomers = 8;
         }
     }
 
@@ -146,6 +169,15 @@ public class Gamepanel extends JPanel implements Runnable {
                 spawnCustomer(); // Spawn a new customer if the spawn interval has passed
                 lastCustomerSpawnTime = currentTime;
             }
+
+            // Update cars in level 3
+            if (Current_level == 3) {
+                updateCars();
+                if (currentTime - lastCarSpawnTime >= carSpawnInterval) {
+                    spawnCar();
+                    lastCarSpawnTime = currentTime;
+                }
+            }
         }
     }
 
@@ -172,6 +204,32 @@ public class Gamepanel extends JPanel implements Runnable {
             }
             // Always check stall contact each frame even if the customer isn't moving
             cChecker.customerCheckTile(customer);
+
+            // Level 3: detect customers standing on the special 3x3 rect and
+            // place a level-3 order for them once.
+            if (Current_level == 3) {
+                int rectX = 40 * tileSize;
+                int rectY = 25 * tileSize;
+                int rectW = 3 * tileSize;
+                int rectH = 3 * tileSize;
+
+                Rectangle rect = new Rectangle(rectX, rectY, rectW, rectH);
+                Rectangle customerArea = new Rectangle(
+                        customer.worldX + customer.solidArea.x,
+                        customer.worldY + customer.solidArea.y,
+                        customer.solidArea.width,
+                        customer.solidArea.height
+                );
+
+                if (rect.intersects(customerArea) && !customer.place_order && !customer.isServed) {
+                    // Create a level 3 order for this customer. Use "Red" so
+                    // the OrderList will populate with level-3 items.
+                    orderBoard.customers.add(new OrderList(3, "Red"));
+                    // Make sure the order board is shown in-world so the player can see the new order
+                    orderBoard.visible = true;
+                    customer.place_order = true;
+                }
+            }
         }
     }
 
@@ -208,6 +266,66 @@ public class Gamepanel extends JPanel implements Runnable {
         }
     }
 
+    private void spawnCar() {
+        if (carsIndex >= maxCars || cars == null) {
+            return;
+        }
+        ensureCarsArray();
+
+        // Cars spawn off-screen to the bottom-left and drive to the rect
+        for (int i = 0; i < cars.length; i++) {
+            if (cars[i] == null) {
+                cars[i] = new Car(this, tileSize * 55, tileSize * 36);
+                carsIndex++;
+                break;
+            }
+        }
+    }
+
+    private void updateCars() {
+        if (cars == null) {
+            return;
+        }
+        Rectangle dropZone = new Rectangle(tileSize * 34, tileSize * 36, tileSize * 4, tileSize * 4);
+
+        for (int i = 0; i < cars.length; i++) {
+            Car car = cars[i];
+            if (car == null) {
+                continue;
+            }
+
+            // Place the order once the car arrives on the grey 4x4 zone.
+            Rectangle carArea = new Rectangle(
+                    car.worldX + car.solidArea.x,
+                    car.worldY + car.solidArea.y,
+                    car.solidArea.width,
+                    car.solidArea.height
+            );
+            if (!car.place_order && !car.isServed && dropZone.intersects(carArea)) {
+                orderBoard.customers.add(new OrderList(3, "Red"));
+                orderBoard.visible = true;
+                car.place_order = true;
+            }
+
+            if (!car.isServed) {
+                car.InPath();
+            } else {
+                car.outPath();
+                if (car.leftMap) {
+                    cars[i] = null;
+                    carsIndex--;
+                }
+            }
+        }
+    }
+
+    private void ensureCarsArray() {
+        if (cars == null) {
+            cars = new Car[maxCars];
+            carsIndex = 0;
+        }
+    }
+
     private int[] spawnCustomerLevel1() {
         return new int[]{tileSize + tileSize * 20, tileSize + tileSize * 43};
     }
@@ -235,7 +353,24 @@ public class Gamepanel extends JPanel implements Runnable {
         return count;
     }
 
-    public Customer getFirstWaitingCustomer(String stallType) {
+    public int countCustomerOutsideTruck(String truckType) {
+        int count = 0;
+        for (int i = 0; i < customersIndex; i++) {
+            Customer customer = customers[i];
+            if (customer == null) {
+                continue;
+            }
+            if (truckType.equals(cChecker.getCustomerContactTruck(customer))) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public Customer getFirstWaitingCustomerStall(String stallType) {
+        if (stallType == null) {
+            return null;
+        }
         for (Customer customer : customers) {
             if (customer == null) {
                 continue;
@@ -247,10 +382,41 @@ public class Gamepanel extends JPanel implements Runnable {
         return null;
     }
 
+    public Customer getFirstWaitingCustomerTruck(String truckType) {
+        if (truckType == null) {
+            return null;
+        }
+        for (Customer customer : customers) {
+            if (customer == null) {
+                continue;
+            }
+            if (!customer.isServed && cChecker.getCustomerContactTruck(customer).equals(truckType)) {
+                return customer;
+            }
+        }
+        return null;
+    }
+
+    public Car getFirstWaitingCar() {
+        if (cars == null) {
+            return null;
+        }
+        for (Car car : cars) {
+            if (car == null) {
+                continue;
+            }
+            if (car.place_order && !car.isServed) {
+                return car;
+            }
+        }
+        return null;
+    }
+
     private void updateLevel() {
         if (keyH.SpacePressed && !SpaceUsed) {
             if (Current_level == 1 && gameState.equals(WORLD_STATE) && Inventory.playerMoney >= 1000) {
                 Current_level = 2;
+                setMaxCustomersForLevel();
                 tileM.reloadLevelMap();
                 // Reset player position and state for level 2
                 player.worldX = tileSize * 15;
@@ -261,8 +427,12 @@ public class Gamepanel extends JPanel implements Runnable {
                 customersIndex = 0;
                 lastCustomerSpawnTime = System.currentTimeMillis();
                 spawnCustomer();
+                // Clear cars when leaving level 3
+                cars = null;
+                carsIndex = 0;
             } else if (Current_level == 2 && Inventory.playerMoney >= 2500) {
                 Current_level = 3;
+                setMaxCustomersForLevel();
                 tileM.reloadLevelMap();
                 // Reset player position and state for level 3
                 player.worldX = tileSize * 15;
@@ -273,6 +443,10 @@ public class Gamepanel extends JPanel implements Runnable {
                 customersIndex = 0;
                 lastCustomerSpawnTime = System.currentTimeMillis();
                 spawnCustomer();
+                // Initialize cars for level 3
+                cars = new Car[maxCars];
+                carsIndex = 0;
+                lastCarSpawnTime = System.currentTimeMillis();
             }
             SpaceUsed = true;
         }
@@ -484,6 +658,11 @@ public class Gamepanel extends JPanel implements Runnable {
                 int sx = 40 * tileSize - player.worldX + player.screenX;
                 int sy = 25 * tileSize - player.worldY + player.screenY;
                 g2.fillRect(sx, sy, 3 * tileSize, 3 * tileSize);
+
+                g2.setColor(new Color(100, 100, 100));
+                sx = 35 * tileSize - player.worldX + player.screenX - tileSize;
+                sy = 37 * tileSize - player.worldY + player.screenY - tileSize;
+                g2.fillRect(sx, sy, tileSize * 4, tileSize * 4);
             }
             // Draw all customers
             for (int i = 0; i < customersIndex; i++) {
@@ -491,15 +670,35 @@ public class Gamepanel extends JPanel implements Runnable {
                     customers[i].draw(g2);
                 }
             }
+            // Draw all cars in the world for level 3
+            if (Current_level == 3 && cars != null) {
+                for (int i = 0; i < carsIndex; i++) {
+                    if (cars[i] != null) {
+                        cars[i].draw(g2);
+                    }
+                }
+            }
         } else if (gameState.equals(STALL_STATE)) {
             tileM.drawInterior(g2);
         }
 
+        if (Current_level == 3 && gameState.equals(WORLD_STATE)) {
+            g2.setColor(new Color(139, 69, 19));
+            int sx = 33 * tileSize - player.worldX + player.screenX;
+            int sy = 17 * tileSize - player.worldY + player.screenY;
+            g2.fillRect(sx, sy, 4 * tileSize, 4 * tileSize);
+        }
         player.draw(g2);
-        drawBoostBar(g2);
-        drawCookBar(g2);
 
         messages.showMessage(g2);
+
+        // Draw order board in-world if it's visible (used for level 3 world orders)
+        if (orderBoard.visible) {
+            orderBoard.draw(g2);
+        }
+
+        drawBoostBar(g2);
+        drawCookBar(g2);
 
         if (gameState.equals(STALL_STATE)) {
             if (currentStallType.equals("Green")) {
@@ -513,12 +712,6 @@ public class Gamepanel extends JPanel implements Runnable {
             restockPanel.draw(g2);
         }
 
-        if (Current_level == 3 && gameState.equals(WORLD_STATE)) {
-            g2.setColor(new Color(139, 69, 19));
-            int sx = 33 * tileSize - player.worldX + player.screenX;
-            int sy = 17 * tileSize - player.worldY + player.screenY;
-            g2.fillRect(sx, sy, 4 * tileSize, 4 * tileSize);
-        }
         // Draw inventory panel
         inventoryPanel.draw(g2);
         informationPanel.draw(g2);

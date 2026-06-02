@@ -20,6 +20,7 @@ public class Customer extends Entity {
     public Random rand = new Random();// Random number generator to determine the customer's path and behavior
     public int InPath = rand.nextInt(3) + 1; // Randomly choose a path to come in for the customer to take (1 through 3)
     public boolean isServed = false; // Flag to indicate whether the customer has been served or not
+    public boolean place_order = false; // True once we've placed a level 3 order for this customer
     public int outPath = InPath; // Out path is based on in path
     public boolean leftMap = false; // Flag to indicate whether the customer has left the map or not
 
@@ -101,8 +102,10 @@ public class Customer extends Entity {
     }
 
     private void inPathLevel1() {
-        if (InPath == 3) InPath = rand.nextInt(2) + 1; // If InPath is 3, randomly choose between path 1 and 2 to ensure customers only come in from the two main paths
-        if (InPath == 1) {
+        if (InPath == 3) {
+            InPath = rand.nextInt(2) + 1; // If InPath is 3, randomly choose between path 1 and 2 to ensure customers only come in from the two main paths
+
+                }if (InPath == 1) {
             if (worldY > stall1Y) {
                 direction = "up";
                 update();

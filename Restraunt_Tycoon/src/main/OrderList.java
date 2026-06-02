@@ -55,13 +55,16 @@ public class OrderList {
                             case 2 -> {
                                 int qty = num.nextInt(1, 3);
                                 items.add(new String[]{"Burger", String.valueOf(qty)});
-                            } case 3 -> {
+                            }
+                            case 3 -> {
                                 int qty = num.nextInt(2, 4);
                                 items.add(new String[]{"Fries", String.valueOf(qty)});
-                            } case 4 -> {
+                            }
+                            case 4 -> {
                                 int qty = num.nextInt(1, 3);
                                 items.add(new String[]{"IceCream", String.valueOf(qty)});
-                            } case 5 -> {
+                            }
+                            case 5 -> {
                                 int qty = num.nextInt(1, 3);
                                 items.add(new String[]{"MilkShake", String.valueOf(qty)});
                             }
@@ -86,13 +89,16 @@ public class OrderList {
                             case 2 -> {
                                 int qty = num.nextInt(1, 3);
                                 items.add(new String[]{"Burger", String.valueOf(qty)});
-                            } case 3 -> {
+                            }
+                            case 3 -> {
                                 int qty = num.nextInt(2, 4);
                                 items.add(new String[]{"Fries", String.valueOf(qty)});
-                            } case 4 -> {
+                            }
+                            case 4 -> {
                                 int qty = num.nextInt(1, 3);
                                 items.add(new String[]{"IceCream", String.valueOf(qty)});
-                            } case 5 -> {
+                            }
+                            case 5 -> {
                                 int qty = num.nextInt(1, 3);
                                 items.add(new String[]{"MilkShake", String.valueOf(qty)});
                             }

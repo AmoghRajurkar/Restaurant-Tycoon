@@ -502,6 +502,29 @@ public class CollisionChecker {
         return "";
     }
 
+    public String getCustomerContactTruck(Entity entity) {
+        // Same code from checkTile but returns the truck name instead of setting a variable and doesn't check world tile collisions since it's only used for customers who don't interact with those
+        int entityLeftWorldX = entity.worldX + entity.solidArea.x;
+        int entityRightWorldX = entity.worldX + entity.solidArea.x + entity.solidArea.width;
+        int entityTopWorldY = entity.worldY + entity.solidArea.y;
+        int entityBottomWorldY = entity.worldY + entity.solidArea.y + entity.solidArea.height;
+
+        int expandedLeftCol = Math.max(0, (entityLeftWorldX - entity.speed) / gp.stallTileSize);
+        int expandedRightCol = Math.min(gp.tileM.truckTileNum.length - 1, (entityRightWorldX + entity.speed) / gp.stallTileSize);
+        int expandedTopRow = Math.max(0, (entityTopWorldY - entity.speed) / gp.stallTileSize);
+        int expandedBottomRow = Math.min(gp.tileM.truckTileNum[0].length - 1, (entityBottomWorldY + entity.speed) / gp.stallTileSize);
+
+        for (int col = expandedLeftCol; col <= expandedRightCol; col++) {
+            for (int row = expandedTopRow; row <= expandedBottomRow; row++) {
+                int tileNum = gp.tileM.truckTileNum[col][row];
+                if (tileNum != 0 && gp.tileM.tile[tileNum].collision) {
+                    return getTruckName(tileNum);
+                }
+            }
+        }
+
+        return "";
+    }
     /**
      * Checks for collision between a customer and the stall tiles, used to
      * check if the customer is touching the stall to decide whether to start
@@ -538,6 +561,19 @@ public class CollisionChecker {
                 if (tileNum != 0 && gp.tileM.tile[tileNum].collision) {
                     contactStall = getStallName(tileNum);
                     return;
+                }
+            }
+        }
+
+        // check for truck tiles in level 2 only, so customers can enter trucks by touching them like the player
+        if (gp.Current_level == 2) {
+            for (int col = expandedLeftCol; col <= expandedRightCol; col++) {
+                for (int row = expandedTopRow; row <= expandedBottomRow; row++) {
+                    int tileNum = gp.tileM.truckTileNum[col][row];
+                    if (tileNum != 0 && gp.tileM.tile[tileNum].collision) {
+                        contactStall = getTruckName(tileNum);
+                        return;
+                    }
                 }
             }
         }
