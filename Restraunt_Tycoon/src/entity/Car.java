@@ -18,7 +18,12 @@ public class Car extends Entity {
     public boolean isServed = false;
     public boolean leftMap = false;
     public OrderList order;
-
+    /*
+    * Constructor for the Car class, initializes the car's position, direction, speed, and collision area.
+    * @param gp The Gamepanel instance for accessing game properties and methods.
+    * @param worldX The initial X coordinate of the car in the game world.
+    * @param worldY The initial Y coordinate of the car in the game world.
+    */
     public Car(Gamepanel gp, int worldX, int worldY) {
         super(gp);
         this.worldX = worldX;
@@ -32,7 +37,11 @@ public class Car extends Entity {
         solidArea.height = gp.tileSize * carSize - 16;
         loadImage();
     }
-
+    
+    /*
+     * Loads the image for the car from the specified file path. If the image fails to load, 
+     * it prints an error message and sets the image to null.
+     */
     private void loadImage() {
         try {
             image = ImageIO.read(new File("res/tiles/Red_truck.png"));
@@ -41,7 +50,9 @@ public class Car extends Entity {
             image = null;
         }
     }
-
+    /*
+     * Checks if the car is doing the in path behavior, which is defined as being to the right of a certain point on the map.
+     */
     public void InPath() {
 
         if (worldX > gp.tileSize * 34) {
@@ -49,7 +60,9 @@ public class Car extends Entity {
             update();
         }
     }
-
+    /*
+     * Checks if the car is doing the out path behavior, which is defined as being to the left of a certain point on the map.
+     */
     public void outPath() {
         direction = "left";
         if (worldX < gp.tileSize * 5) {
@@ -57,7 +70,11 @@ public class Car extends Entity {
         }
         update();
     }
-
+    /*
+     * Updates the car's position and checks for collisions. If a collision is detected, the car will not move.
+     *If the car is moving, it will update its position based on its direction and speed. The method also checks
+     *for collisions with other cars and the boundaries of the game world.
+     */
     public void update() {
         // Update the car's position
         isMoving = false;
@@ -111,7 +128,10 @@ public class Car extends Entity {
             }
         }
     }
-
+    /*
+     * Draws the car on the screen.
+     * @param g2 The Graphics2D object for drawing.
+     */
     public void draw(Graphics2D g2) {
         if (image == null) {
             return;
