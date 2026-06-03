@@ -82,7 +82,9 @@ public class Gamepanel extends JPanel implements Runnable {
     public InformationPanel informationPanel = new InformationPanel();
     public Messages messages;
     public boolean level3RestockZone = false;
-
+    /**
+     * Constructor for the Gamepanel class, initializes the game panel and its components.
+     */
     public Gamepanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
         this.setBackground(new Color(62, 194, 83));
@@ -99,7 +101,10 @@ public class Gamepanel extends JPanel implements Runnable {
             spawnCustomer();
         }
     }
-
+    /**
+     * Changes the game settings based on the current level such as the maximum number of customers and the customer spawn interval. 
+     * This method is called when the player advances to a new level to adjust the game's difficulty and pacing accordingly.
+     */
     private void LevelChanges() {
         switch (Current_level) {
             case 1 -> {
@@ -120,12 +125,16 @@ public class Gamepanel extends JPanel implements Runnable {
             }
         }
     }
-
+    /**
+     * Starts the game thread.
+     */
     public void startGameThread() {
         gameThread = new Thread(this);
         gameThread.start();
     }
-
+    /**
+     * The main game loop that updates the game state and repaints the screen.
+     */
     @Override
     public void run() {
         double drawInterval = 1000000000.0 / FPS;
@@ -143,7 +152,11 @@ public class Gamepanel extends JPanel implements Runnable {
             }
         }
     }
-
+    
+    /**
+     * Updates the game state including the player, customers, inventory panel, information panel, level progression, and order board. 
+     * It also handles customer spawning and car spawning for level 3, as well as checking for player interactions with the restock zone and updating the restock panel accordingly.
+     */
     public void update() {
         player.update();
         messages.update();
@@ -188,7 +201,9 @@ public class Gamepanel extends JPanel implements Runnable {
             }
         }
     }
-
+    /**
+     * Updates the customer entities in the game by iterating through the customers array and checking their states.
+     */
     private void updateCustomers() {
         if (customers == null) {
             return;
@@ -238,7 +253,12 @@ public class Gamepanel extends JPanel implements Runnable {
             }
         }
     }
-
+    /**
+     * Retrieves the customer associated with a specific order.
+     * @param order The order for which to find the customer.
+     * @return The customer associated with the order, or null if not found.
+     */
+    public 
     public Customer getCustomerForOrder(OrderList order) {
         for (Customer customer : customers) {
             if (customer != null && customer.order == order) {
@@ -247,7 +267,11 @@ public class Gamepanel extends JPanel implements Runnable {
         }
         return null;
     }
-
+    /**
+     * Retrieves the car associated with a specific order.
+     * @param order The order for which to find the car.
+     * @return The car associated with the order, or null if not found.
+     */
     public Car getCarForOrder(OrderList order) {
         if (cars == null) {
             return null;
@@ -260,7 +284,10 @@ public class Gamepanel extends JPanel implements Runnable {
 
         return null;
     }
-
+    /**
+     * Spawns a new customer in the game. The spawn location is determined based on the current level, and the method ensures that the number of
+     * customers does not exceed the maximum allowed for the level.
+     */
     private void spawnCustomer() {
         if (customersIndex >= maxCustomers) {
             return;
@@ -286,14 +313,19 @@ public class Gamepanel extends JPanel implements Runnable {
             }
         }
     }
-
+    /**
+     * Ensures that the customers array is initialized.
+     */
     private void ensureCustomersArray() {
         if (customers == null) {
             customers = new Customer[maxCustomers];
             customersIndex = 0;
         }
     }
-
+    /**
+     * Spawns a new car in the game. The spawn location is determined based on the level 3 design, and the method ensures 
+     * that the number of cars does not exceed the maximum allowed for the level.
+     */
     private void spawnCar() {
         if (carsIndex >= maxCars || cars == null) {
             return;
@@ -309,7 +341,10 @@ public class Gamepanel extends JPanel implements Runnable {
             }
         }
     }
-
+    /**
+     * Updates the car entities in the game. The method iterates through the cars array and checks their 
+     * states to determine if they are following the in path or out path behavior.
+     */
     private void updateCars() {
         if (cars == null) {
             return;
@@ -353,26 +388,41 @@ public class Gamepanel extends JPanel implements Runnable {
             }
         }
     }
-
+    /**
+     * Ensures that the cars array is initialized.
+     */
     private void ensureCarsArray() {
         if (cars == null) {
             cars = new Car[maxCars];
             carsIndex = 0;
         }
     }
-
+    /**
+     * Returns the spawn location for customers in level 1.
+     * @return An array containing the x and y coordinates for the spawn location.
+     */
     private int[] spawnCustomerLevel1() {
         return new int[]{tileSize + tileSize * 20, tileSize + tileSize * 43};
     }
-
+    /**
+     * Returns the spawn location for customers in level 2.
+     * @return An array containing the x and y coordinates for the spawn location.
+     */
     private int[] spawnCustomerLevel2() {
         return new int[]{tileSize + tileSize * 6, tileSize + tileSize * 36};
     }
-
+    /**
+     * Returns the spawn location for customers in level 3.
+     * @return An array containing the x and y coordinates for the spawn location.
+     */
     private int[] spawnCustomerLevel3() {
         return new int[]{tileSize + tileSize * 1, tileSize + tileSize * 40};
     }
-
+    /**
+     * Counts the number of customers outside a specific stall.
+     * @param stallType The type of stall to check.
+     * @return The number of customers outside the specified stall.
+     */
     public int countCustomersOutsideStall(String stallType) {
         // Checks if customer is in contact with stall and counts them
         int count = 0;
@@ -388,7 +438,11 @@ public class Gamepanel extends JPanel implements Runnable {
         }
         return count;
     }
-
+    /**
+     * Counts the number of customers outside a specific truck.
+     * @param truckType The type of truck to check.
+     * @return The number of customers outside the specified truck.
+     */
     public int countCustomerOutsideTruck(String truckType) {
         // Checks if customer is in contact with stall and counts them
         int count = 0;
@@ -403,7 +457,11 @@ public class Gamepanel extends JPanel implements Runnable {
         }
         return count;
     }
-
+    /**
+     * Returns the first waiting customer at a specific stall.
+     * @param stallType The type of stall to check.
+     * @return The first waiting customer at the specified stall, or null if none found.
+     */
     public Customer getFirstWaitingCustomerStall(String stallType) {
         if (stallType == null) {
             return null;
@@ -418,7 +476,11 @@ public class Gamepanel extends JPanel implements Runnable {
         }
         return null;
     }
-
+    /**
+     * Returns the first waiting customer at a specific truck.
+     * @param truckType The type of truck to check.
+     * @return The first waiting customer at the specified truck, or null if none found.
+     */
     public Customer getFirstWaitingCustomerTruck(String truckType) {
         if (truckType == null) {
             return null;
@@ -433,7 +495,11 @@ public class Gamepanel extends JPanel implements Runnable {
         }
         return null;
     }
-
+    /**
+     * Returns the first waiting car at a specific truck.
+     * @param truckType The type of truck to check.
+     * @return The first waiting car at the specified truck, or null if none found.
+     */
     public Car getFirstWaitingCar() {
         if (cars == null) {
             return null;
@@ -449,7 +515,11 @@ public class Gamepanel extends JPanel implements Runnable {
         }
         return null;
     }
-
+    /**
+     * Updates the level-specific settings and entities. This method is called when the player advances to a new level to 
+     * adjust the game's difficulty and pacing accordingly. It also resets the player's position and state, and clears or initializes
+     * entities such as customers and cars based on the new level's requirements.
+     */
     private void updateLevel() {
         if (keyH.SpacePressed && !SpaceUsed) {
             if (Current_level == 1 && gameState.equals(WORLD_STATE) && Inventory.playerMoney >= 1000) {
@@ -492,7 +562,9 @@ public class Gamepanel extends JPanel implements Runnable {
             SpaceUsed = false;
         }
     }
-
+    /**
+     * Updates the order board.
+     */
     private void updateOrderBoard() {
         // toggle order board visibility
         if (keyH.toggleOrdersPressed && !toggleUsed) {
@@ -512,7 +584,9 @@ public class Gamepanel extends JPanel implements Runnable {
             fulfillUsed = false;
         }
     }
-
+    /**
+     * Updates the restock panel.
+     */
     @SuppressWarnings("static-access")
     private void updateRestockPanel() {
         // Toggle restock panel visibility
@@ -584,7 +658,9 @@ public class Gamepanel extends JPanel implements Runnable {
             backspaceUsed = false;
         }
     }
-
+    /**
+     * Updates the inventory panel.
+     */
     private void updateInventoryPanel() {
         // toggle inventory panel visibility
         if (keyH.toggleInventoryPressed && !InventoryUsed) {
@@ -614,7 +690,9 @@ public class Gamepanel extends JPanel implements Runnable {
             }
         }
     }
-
+    /**
+     * Updates the information panel.
+     */
     private void updateInformationPanel() {
         if (keyH.toggleInfoPressed && !infoUsed) {
             informationPanel.toggle();
@@ -624,7 +702,10 @@ public class Gamepanel extends JPanel implements Runnable {
             infoUsed = false;
         }
     }
-
+    /**
+     * Draws the boost bar on the screen. The boost bar visually represents the player's current boost charge level, 
+     * allowing the player to see how much boost they have available for sprinting. 
+     */
     private void drawBoostBar(Graphics2D g2) {
         int x = screenWidth - boostBarWidth - boostBarMargin;
         int y = boostBarMargin;
@@ -652,7 +733,9 @@ public class Gamepanel extends JPanel implements Runnable {
         int textY = y + ((boostBarHeight - fm.getHeight()) / 2) + fm.getAscent();
         g2.drawString(label, textX, textY);
     }
-
+    /**
+     * Draws the cook bar on the screen. The cook bar visually represents the current cooking progress for the player
+     */
     private void drawCookBar(Graphics2D g2) {
         int x = screenWidth - boostBarWidth - boostBarMargin;
         int y = boostBarMargin + boostBarHeight + 8;
@@ -683,7 +766,10 @@ public class Gamepanel extends JPanel implements Runnable {
         int textY = y + ((boostBarHeight - fm.getHeight()) / 2) + fm.getAscent();
         g2.drawString(label, textX, textY);
     }
-
+    /**
+     * Paints the game components on the screen. The method is responsible for drawing the game world, including the tiles, player, customers, cars, order board, 
+     * boost bar, cook bar, inventory panel, information panel, and restock panel based on the current game state and level.
+     */
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
