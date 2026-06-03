@@ -8,7 +8,6 @@ import java.util.*;
 public class OrderBoard {
 
     // ArrayList where each element is a customer's full OrderList (their items + quantities).
-    // It is final, but customers can still be added/removed from it
     public final ArrayList<OrderList> customers = new ArrayList<>();
     public final ArrayList<OrderList> cars = new ArrayList<>();
 
@@ -46,7 +45,6 @@ public class OrderBoard {
         cars.clear();
     }
 
-    // Press 2 — give the next available item from any waiting customer, remove them if done
     /**
      * Fulfills the first available item from the waiting customers. It iterates
      * through the customers and their orders, checking if the player has the
@@ -57,6 +55,7 @@ public class OrderBoard {
      */
     @SuppressWarnings("static-access")
     public void fulfillFirst() {
+        // Level 3 needs to be first, since its different than the others
         if (gp.Current_level == 3) {
             if (customers.isEmpty() && cars.isEmpty()) {
                 gp.messages.showMessageForDuration("No customers waiting.");
@@ -121,7 +120,7 @@ public class OrderBoard {
                 }
             }
 
-            // NO CUSTOMER COULD BE SERVED -> TRY CARS
+            // If there are no customer, then give food to cars
             for (int carIndex = 0; carIndex < cars.size(); carIndex++) {
                 OrderList order = cars.get(carIndex);
                 if (order.items.isEmpty()) {
@@ -280,21 +279,21 @@ public class OrderBoard {
     private int itemNameToIndex(String name) {
         return switch (name) {
             case "Burger" ->
-                6; // "Burgers"
+                6;
             case "Fries" ->
-                7;  // "Fries"
+                7;
             case "MilkShake" ->
-                8; // "Milk Shakes"
+                8;
             case "IceCream" ->
-                9; // "Ice Creams"
+                9;
             case "Popcorn" ->
-                11; // "Popcorn"
+                11;
             case "Soda" ->
-                13; // "Soda"
+                13;
             case "Coffee" ->
-                16; // "Coffee"
+                16;
             case "Omelet" ->
-                17; // "Omelet"
+                17;
             default ->
                 -1;
         };

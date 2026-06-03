@@ -28,10 +28,10 @@ public class InformationPanel {
         lines.add("- E to enter stall");
         lines.add("- I to toggle inventory");
         lines.add("- 2 to give food");
-        lines.add("- Green stall is restock");
-        lines.add("- Red and Blue stall are food");
+        lines.add("- U to upgrade cooking speed and profit multiplier");
+        lines.add("- Green buildings are for restock");
         lines.add("- Tab or CAPS LOCK to toggle pannels");
-        lines.add("- Get more money to buy to next level");
+        lines.add("- Space to go to next level if you can");
         lines.add("- Customers may stay for more food, so let it happen");
     }
 

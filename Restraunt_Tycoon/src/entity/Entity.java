@@ -4,10 +4,10 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import main.Gamepanel;
 
-// Superclass for all entities in the game, such as players, customers, and workers.
+// Superclass for all entities in the game
 public class Entity {
 
-    Gamepanel gp; // Reference to the Gamepanel, which can be used to access game-related properties and methods
+    Gamepanel gp;
     public int worldX, worldY;
     public int speed;
     public BufferedImage up1, up2, down1, down2, left1, left2, right1, right2; // Sprite images for the entity's movement

@@ -17,8 +17,7 @@ public class RestockPanel {
     private static final int SCREEN_W = 1280;
     private static final int SCREEN_H = 960;
 
-    // Indices into Inventory.INVENTORY that the player is allowed to purchase.
-    // Ignores burgers, fries, milk shakes, ice creams and money
+    // Indexs in INVENTORY that the player is allowed to purchase.
     private static final int[] Buyable_items = {0, 1, 2, 3, 4, 5, 10, 12, 14, 15};
     private static final int MAX_VISIBLE_ROWS = 8;
 
@@ -71,7 +70,6 @@ public class RestockPanel {
         try {
             qty = Integer.parseInt(typedQty);
         } catch (NumberFormatException e) {
-            // invalid number typed; cancel
             typedQty = "";
             typingMode = false;
             return;
@@ -94,7 +92,7 @@ public class RestockPanel {
 
         int taken = Inventory.giveToPlayer(itemIndex, qty);
 
-        // Record how many were taken so caller (Gamepanel) can charge player
+        // Record how many were taken so Gamepanel can charge player
         Inventory.moneyGiven = taken;
 
         // Reset typing mode and clear typed quantity after confirming
@@ -149,7 +147,7 @@ public class RestockPanel {
                 g2.fillRoundRect(panelX + PADDING - 4, rowY - 33, PANEL_W - PADDING * 2 + 4, ROW_HEIGHT, 8, 8);
             }
 
-            int qty = inventory.stallItems[itemIndex];
+            int qty = inventory.restockStationItems[itemIndex];
             // Red when out of stock, white normally
             if (qty <= 0) {
                 g2.setColor(new Color(220, 60, 60));

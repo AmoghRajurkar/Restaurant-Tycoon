@@ -9,10 +9,10 @@ public class Inventory {
 
     // Player starts with 0 of everything
     public static int[] playerItems = new int[INVENTORY.length];
-    public static double playerMoney = 300;
+    public static double playerMoney = 10000;
 
     // Green stall starts with 1000 of everything
-    public static int[] stallItems = new int[INVENTORY.length];
+    public static int[] restockStationItems = new int[INVENTORY.length];
     public static double moneyGiven;
 
     /**
@@ -21,7 +21,8 @@ public class Inventory {
      */
     public Inventory() {
         for (int i = 0; i < INVENTORY.length; i++) {
-            stallItems[i] = 1000;
+            restockStationItems[i] = 1000;
+            playerItems[i] = 100;
         }
     }
 
@@ -64,7 +65,7 @@ public class Inventory {
      */
     // Caps at player limit and stall stock. Returns how many were actually taken.
     public static int giveToPlayer(int itemIndex, int amount) {
-        int inStall = stallItems[itemIndex];
+        int inStall = restockStationItems[itemIndex];
         int playerHas = playerItems[itemIndex];
         int canCarry = PLAYER_CAP - playerHas;
 
@@ -73,7 +74,7 @@ public class Inventory {
         if (taken <= 0) {
             return 0;
         }
-        stallItems[itemIndex] -= taken;
+        restockStationItems[itemIndex] -= taken;
         playerItems[itemIndex] += taken;
 
         moneyGiven += 0.5 * taken; // Each item costs the player 50% of its base value when restocking

@@ -9,17 +9,13 @@ import javax.imageio.ImageIO;
 import main.Gamepanel;
 import main.OrderList;
 
-// Car entity with movement, spawning, InPath and outPath like Customer.
-// Drawn at 4x tile size with no animation.
 public class Car extends Entity {
 
     private BufferedImage image;
     public int carSize = 4; // Size is 4x tile size
     public Random rand = new Random();
-    public int InPath = rand.nextInt(3) + 1;
     public boolean place_order = false;
     public boolean isServed = false;
-    public int outPath = InPath;
     public boolean leftMap = false;
     public OrderList order;
 
@@ -63,14 +59,14 @@ public class Car extends Entity {
     }
 
     public void update() {
-        // Logic to update the customer's position and behavior goes here
+        // Update the car's position
         isMoving = false;
 
         // Check for collisions with tiles
         collisionOn = false; // Reset collision flag before checking for collisions
         gp.cChecker.checkEntityCollision(this, gp.cars); // Check for collisions with other cars
 
-        // Check world boundary — stop the player when the edge of the map would come into view
+        // Check world boundary and stop the player when the edge of the map would come into view
         if (direction.equals("up") && worldY <= 0) {
             collisionOn = true;
             SpriteCounter = 0;
@@ -88,27 +84,27 @@ public class Car extends Entity {
             SpriteCounter = 0;
         }
 
-        // If collision is false, customer can move
+        // If collision is false, car can move
         if (collisionOn == false) {
             isMoving = true;
             switch (direction) {
                 case "up" -> {
-                    worldY -= speed; // Update worldX to reflect the customer's movement in the world
+                    worldY -= speed;
                     isMoving = true;
                     break;
                 }
                 case "down" -> {
-                    worldY += speed; // Update worldY to reflect the customer's movement in the world
+                    worldY += speed;
                     isMoving = true;
                     break;
                 }
                 case "left" -> {
-                    worldX -= speed; // Update worldX to reflect the customer's movement in the world
+                    worldX -= speed;
                     isMoving = true;
                     break;
                 }
                 case "right" -> {
-                    worldX += speed; // Update worldX to reflect the customer's movement in the world
+                    worldX += speed;
                     isMoving = true;
                     break;
                 }

@@ -12,7 +12,7 @@ public class Messages {
     private static final int SCREEN_W = 740;
     private static final int SCREEN_H = 100;
 
-    private static final long DURATION = 2500; // 2.5 seconds in milliseconds
+    private static final long DURATION = 2000; // 2 seconds
     public boolean visible = false;
     public static String message;
     private long messageStartTime = 0;

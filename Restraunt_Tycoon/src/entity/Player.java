@@ -11,16 +11,16 @@ import main.OrderList;
 
 public class Player extends Entity {
 
-    KeyHandler keyH; // Reference to the KeyHandler, which can be used to check the state of key presses
+    KeyHandler keyH; // Reference to the KeyHandler to check keyboard
     public boolean boostActive = false; // Indicates whether the boost is currently active
     public int boostTimer = 0; // Timer to track the duration of the boost
     public boolean boostReloading = false; // Indicates whether the boost is currently reloading
     public int reloadTimer = 0; // Timer to track the duration of the boost reload
     public final int maxBoostTimer = 30; // Frames boost lasts at 60 FPS
     public final int maxBoostReload = 60; // Frames to recharge boost at 60 FPS
-    public int animationThreshold; // Variable to control the speed of the walking animation, which can be adjusted based on boost status
-    public final int screenX; // X position of the player on the screen, which can be used for rendering the player
-    public final int screenY; // Y position of the player on the screen, which can be used for rendering the player
+    public int animationThreshold; // Variable to control the speed of the walking animation
+    public final int screenX; // X position of the player on the screen, used for rendering the player
+    public final int screenY; // Y position of the player on the screen, used for rendering the player
     public int roomX;
     public int roomY;
     public int cookLevel = 1;
@@ -43,7 +43,7 @@ public class Player extends Entity {
         screenX = gp.screenWidth / 2 - (gp.tileSize / 2); // Set the player's X position to the center of the screen
         screenY = gp.screenHeight / 2 - (gp.tileSize / 2); // Set the player's Y position to the center of the screen
 
-        solidArea = new Rectangle(); // Define the solid area for collision detection (adjust as needed)
+        solidArea = new Rectangle();
         solidArea.x = 8;
         solidArea.y = 16;
         solidArea.width = gp.tileSize - 16;
@@ -62,8 +62,8 @@ public class Player extends Entity {
         worldY = gp.tileSize * 22; // Set the default Y position of the player
         roomX = 400;
         roomY = 500;
-        speed = 5; // Set the default speed of the player
-        direction = "down"; // Set the default direction of the player
+        speed = 5;
+        direction = "down";
     }
 
     /**
@@ -76,38 +76,35 @@ public class Player extends Entity {
     @SuppressWarnings("static-access")
     public void update() {
         // Update game state logic
+
+        // Player movement
         isMoving = false;
 
-        // Ensure we always update world collision/contact each frame so the
-        // per-frame contactStall and contactTruck variables are correct even
-        // when the player is standing still
+        // Ensure we always update world collision each frame so the per-frame contactStall and contactTruck variables are correct even when the player is standing still
         if (gp.gameState.equals(gp.WORLD_STATE)) {
             gp.cChecker.checkTile(this);
         }
 
-        // Check for interaction key press to enter stall or truck, only if we're in the world and standing next to one
+        // Entering stall or truck by pressig E next to stall
         if (keyH.interactPressed && gp.gameState.equals(gp.WORLD_STATE)) {
-            // Use the instantaneous contact variables (reset each frame) to
-            // avoid opening a room based on stale `lastContact*` values.
             if (gp.Current_level == 1 && !CollisionChecker.contactStall.equals("")) {
                 enterRoom("stall");
                 keyH.interactPressed = false;
             } else if (gp.Current_level >= 2 && !CollisionChecker.contactTruck.equals("")) {
-                // Treat level 2+ as truck levels (includes level 3 fallback)
                 enterRoom("truck");
                 keyH.interactPressed = false;
             }
         }
 
-        // Upgrade cook level
+        // Upgrade cook level and profit multiplier
         if (gp.keyH.UpgradeCookPressed && !gp.UpgradeCookUsed) {
-            if (!canUpgradeCook()) {
+            if (!canUpgrade()) {
                 gp.messages.showMessageForDuration("Not enough money to upgrade");
                 return;
             }
             UpgradeCookLevel();
             gp.messages.showMessageForDuration("Cook Level " + cookLevel + "        Profit multiplier x" + String.format("%.2f", getMoneyMultiplier()));
-            gp.inventory.takeMoneyFromPlayer(100 * cookLevel); // Pay for the upgrade
+            gp.inventory.takeMoneyFromPlayer(100 * cookLevel / 2);
             gp.UpgradeCookUsed = true;
         }
         if (!gp.keyH.UpgradeCookPressed) {
@@ -163,7 +160,7 @@ public class Player extends Entity {
                             worldX += speed;
                     }
                 } else if (gp.gameState.equals(gp.STALL_STATE)) {
-                    if (!gp.cChecker.checkStallTile(roomX, roomY, direction, speed)) {
+                    if (!gp.cChecker.checkInteriorTile(roomX, roomY, direction, speed)) {
                         switch (direction) {
                             case "up" ->
                                 roomY -= speed;
@@ -178,7 +175,7 @@ public class Player extends Entity {
                 }
             }
 
-            SpriteCounter++; // Increment the sprite counter for animation timing
+            SpriteCounter++;
             if (boostActive) {
                 animationThreshold = 6; // Faster animation when boosting
             } else {
@@ -198,10 +195,10 @@ public class Player extends Entity {
             SpriteNum = 1; // Reset to the first frame so still image is stable
         }
 
-        // if boost key is pressed and boost is not active or reloading, activate boost
+        // If boost key is pressed and boost is not active or reloading, activate boost
         if (keyH.boostPressed == true && !boostActive && !boostReloading) {
             boostActive = true;
-            boostTimer = 30; // .5 second at 60 FPS
+            boostTimer = 60; // 1 second at 60 FPS
         }
 
         // Handle boost timer and reloading logic
@@ -210,11 +207,11 @@ public class Player extends Entity {
             if (boostTimer <= 0) {
                 boostActive = false;
                 boostReloading = true;
-                reloadTimer = 60; // 1 second reload time at 60 FPS
+                reloadTimer = 90; // 1.5 second reload time at 60 FPS
             }
         }
 
-        // Handle boost reloading timer
+        // Boost reloading timer
         if (boostReloading) {
             reloadTimer--;
             if (reloadTimer <= 0) {
@@ -229,8 +226,8 @@ public class Player extends Entity {
             speed = 5;
         }
 
+        // Exiting stall when hitting the exit door
         if (gp.gameState.equals(gp.STALL_STATE)) {
-            // Exit zone spans the full height of the door (7 tiles tall)
             Rectangle exitZone = new Rectangle(
                     gp.tileM.doorX,
                     gp.tileM.doorY,
@@ -282,27 +279,54 @@ public class Player extends Entity {
     private void enterRoom(String roomType) {
         gp.gameState = gp.STALL_STATE;
         gp.tileM.loadInterior();
+        gp.orderBoard.loadForStall("");
 
         if ("stall".equals(roomType)) {
-            gp.currentStallType = CollisionChecker.lastContactStall;
-            gp.orderBoard.loadForStall(CollisionChecker.lastContactStall);
-            int waitingCustomers = gp.countCustomersOutsideStall(CollisionChecker.lastContactStall);
-            if (waitingCustomers > 0) {
-                for (int i = 0; i < waitingCustomers; i++) {
-                    gp.orderBoard.customers.add(new OrderList(1, CollisionChecker.lastContactStall));
+            String stallType = CollisionChecker.lastContactStall;
+            gp.currentStallType = stallType;
+            for (Customer customer : gp.customers) {
+                if (customer == null) {
+                    continue;
                 }
+
+                if (customer.isServed) {
+                    continue;
+                }
+
+                if (!gp.cChecker.getCustomerContactStall(customer).equals(stallType)) {
+                    continue;
+                }
+
+                // Only create an order once
+                if (customer.order == null) {
+                    customer.order = new OrderList(1, stallType);
+                }
+                gp.orderBoard.customers.add(customer.order);
             }
+
         } else if ("truck".equals(roomType)) {
-            gp.currentStallType = CollisionChecker.lastContactTruck;
-            gp.orderBoard.loadForStall(CollisionChecker.lastContactTruck);
-            int waitingCustomers = gp.countCustomerOutsideTruck(CollisionChecker.lastContactTruck);
-            if (waitingCustomers > 0) {
-                for (int i = 0; i < waitingCustomers; i++) {
-                    gp.orderBoard.customers.add(new OrderList(2, CollisionChecker.lastContactTruck));
+            String truckType = CollisionChecker.lastContactTruck;
+            gp.currentStallType = truckType;
+
+            for (Customer customer : gp.customers) {
+                if (customer == null) {
+                    continue;
                 }
+
+                if (customer.isServed) {
+                    continue;
+                }
+
+                if (!gp.cChecker.getCustomerContactTruck(customer).equals(truckType)) {
+                    continue;
+                }
+                // Only create an order once
+                if (customer.order == null) {
+                    customer.order = new OrderList(2, truckType);
+                }
+                gp.orderBoard.customers.add(customer.order);
             }
         }
-
         roomX = gp.screenWidth / 2 - gp.tileSize / 2;
         roomY = gp.screenHeight - 350;
         gp.repaint();
@@ -424,7 +448,7 @@ public class Player extends Entity {
      * Inventory
      */
     @SuppressWarnings("static-access")
-    private boolean canUpgradeCook() {
+    private boolean canUpgrade() {
         // Check if player has enough money to upgrade cook level
         return gp.inventory.playerMoney >= 100 * (cookLevel + 1);
     }

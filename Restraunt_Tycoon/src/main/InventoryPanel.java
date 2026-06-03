@@ -39,7 +39,7 @@ public class InventoryPanel {
     }
 
     // Toggle visibility
-    public void toggle() {
+    public void visible() {
         visible = !visible;
         if (visible) {
             selectedIndex = 0;

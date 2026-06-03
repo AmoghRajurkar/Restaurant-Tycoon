@@ -79,15 +79,15 @@ public class OrderList {
                         int choice = num.nextInt(8);
                         switch (choice) {
                             case 0 -> {
-                                int qty = num.nextInt(1, 4);
+                                int qty = num.nextInt(2, 4);
                                 items.add(new String[]{"Popcorn", String.valueOf(qty)});
                             }
                             case 1 -> {
-                                int qty = num.nextInt(1, 4);
+                                int qty = num.nextInt(2, 4);
                                 items.add(new String[]{"Soda", String.valueOf(qty)});
                             }
                             case 2 -> {
-                                int qty = num.nextInt(1, 3);
+                                int qty = num.nextInt(1, 5);
                                 items.add(new String[]{"Burger", String.valueOf(qty)});
                             }
                             case 3 -> {
@@ -103,11 +103,11 @@ public class OrderList {
                                 items.add(new String[]{"MilkShake", String.valueOf(qty)});
                             }
                             case 6 -> {
-                                int qty = num.nextInt(1, 3);
+                                int qty = num.nextInt(3, 5);
                                 items.add(new String[]{"Coffee", String.valueOf(qty)});
                             }
                             case 7 -> {
-                                int qty = num.nextInt(1, 3);
+                                int qty = num.nextInt(2, 5);
                                 items.add(new String[]{"Omelet", String.valueOf(qty)});
                             }
                         }

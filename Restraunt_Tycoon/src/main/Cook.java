@@ -3,10 +3,10 @@ package main;
 public class Cook {
 
     public int cookTime;
-    public int foodIndex; // Index of the item being cooked in the inventory
+    public int foodIndex;
     public int ingredient1Index; // Index of the first ingredient in the inventory
     public int ingredient1Amount = 1; // Amount of ingredient1 required
-    public int ingredient2Index = -1; // Index of the second ingredient in the inventory (for burgers and milkshakes)
+    public int ingredient2Index = -1; // Index of the second ingredient in the inventory
     public int ingredient2Amount = 1; // Amount of ingredient2 required
     public static int price = 0;
     public static boolean cooking = false;
@@ -148,6 +148,4 @@ public class Cook {
 
         return hasIngredient1 && hasIngredient2;
     }
-
-
 }

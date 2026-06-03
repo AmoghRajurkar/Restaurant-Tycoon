@@ -11,18 +11,18 @@ import main.OrderList;
 
 public class Customer extends Entity {
 
-    public int screenX; // X position of the customer on the screen, which can be used for rendering the customer
-    public int screenY; // Y position of the customer on the screen, which can be used for rendering the customer
-    public int stall1X = 760;// X position of the first stall, which can be used for determining the customer's path to the stall
-    public int stall1Y = 750;// Y position of the first stall, which can be used for determining the customer's path to the stall
-    public int stall2X = 2200;// X position of the second stall, which can be used for determining the customer's path to the stall
-    public int stall2Y = 1010;// Y position of the second stall, which can be used for determining the customer's path to the stall
-    public int animationThreshold; // Variable to control the speed of the walking animation, which can be adjusted based on boost status
-    public Random rand = new Random();// Random number generator to determine the customer's path and behavior
+    public int screenX; // X position of the customer on the screen
+    public int screenY; // Y position of the customer on the screen
+    public int stall1X = 760; // X position of the first stall for InPath
+    public int stall1Y = 750; // Y position of the first stall for InPath
+    public int stall2X = 2200; // X position of the second stall for InPath
+    public int stall2Y = 1010; // Y position of the second stall for InPath
+    public int animationThreshold; // Variable to control the speed of the walking animation (faster for boost)
+    public Random rand = new Random(); // Random number generator to determine the customer's path and behavior
     public int InPath = rand.nextInt(3) + 1; // Randomly choose a path to come in for the customer to take (1 through 3)
     public boolean isServed = false; // Flag to indicate whether the customer has been served or not
-    public boolean place_order = false; // True once we've placed a level 3 order for this customer
     public boolean leftMap = false; // Flag to indicate whether the customer has left the map or not
+    public boolean place_order = false; // Only for level 3, true if an order is placed 
     public OrderList order;
 
     /**
@@ -93,180 +93,162 @@ public class Customer extends Entity {
      */
     public void InPath() {
         switch (gp.Current_level) {
-            case 2 ->
-                inPathLevel2();
-            case 3 ->
-                inPathLevel3();
-            default ->
-                inPathLevel1();
-        }
-    }
+            case 1 -> {
+                if (InPath == 3) {
+                    InPath = rand.nextInt(2) + 1; // If InPath is 3, randomly choose between path 1 and 2 to ensure customers only come in from the two main paths
 
-    private void inPathLevel1() {
-        if (InPath == 3) {
-            InPath = rand.nextInt(2) + 1; // If InPath is 3, randomly choose between path 1 and 2 to ensure customers only come in from the two main paths
-
-        }
-        if (InPath == 1) {
-            if (worldY > stall1Y) {
-                direction = "up";
-                update();
-            } else if (worldX > stall1X) {
-                direction = "left";
-                update();
+                }
+                if (InPath == 1) {
+                    if (worldY > stall1Y) {
+                        direction = "up";
+                        update();
+                    } else if (worldX > stall1X) {
+                        direction = "left";
+                        update();
+                    }
+                }
+                if (InPath == 2) {
+                    if (worldY > 1300) {
+                        direction = "up";
+                        update();
+                    } else if (worldX < 2000) {
+                        direction = "right";
+                        update();
+                    } else if (worldY > stall2Y) {
+                        direction = "up";
+                        update();
+                    } else if (worldX < stall2X) {
+                        direction = "right";
+                        update();
+                    }
+                }
             }
-        }
-        if (InPath == 2) {
-            if (worldY > 1300) {
-                direction = "up";
-                update();
-            } else if (worldX < 2000) {
-                direction = "right";
-                update();
-            } else if (worldY > stall2Y) {
-                direction = "up";
-                update();
-            } else if (worldX < stall2X) {
-                direction = "right";
-                update();
+            case 2 -> {
+                if (InPath == 1) {
+                    if (worldY > gp.tileSize * 28 - 40) {
+                        direction = "up";
+                        update();
+                    } else if (worldX < gp.tileSize * 15) {
+                        direction = "right";
+                        update();
+                    }
+                }
+                if (InPath == 2) {
+                    if (worldY > gp.tileSize * 29 - 40) {
+                        direction = "up";
+                        update();
+                    } else if (worldX < gp.tileSize * 27) {
+                        direction = "right";
+                        update();
+                    } else if (worldY > gp.tileSize * 28 - 40) {
+                        direction = "up";
+                        update();
+                    } else if (worldX < gp.tileSize * 31) {
+                        direction = "right";
+                        update();
+                    }
+                }
+                if (InPath == 3) {
+                    if (worldY > gp.tileSize * 30 - 40) {
+                        direction = "up";
+                        update();
+                    } else if (worldX < gp.tileSize * 43) {
+                        direction = "right";
+                        update();
+                    } else if (worldY > gp.tileSize * 28 - 40) {
+                        direction = "up";
+                        update();
+                    } else if (worldX < gp.tileSize * 47) {
+                        direction = "right";
+                        update();
+                    }
+                }
             }
-        }
-    }
-
-    private void inPathLevel2() {
-        if (InPath == 1) {
-            if (worldY > gp.tileSize * 28 - 40) {
-                direction = "up";
-                update();
-            } else if (worldX < gp.tileSize * 15) {
-                direction = "right";
-                update();
-            }
-        }
-        if (InPath == 2) {
-            if (worldY > gp.tileSize * 29 - 40) {
-                direction = "up";
-                update();
-            } else if (worldX < gp.tileSize * 27) {
-                direction = "right";
-                update();
-            } else if (worldY > gp.tileSize * 28 - 40) {
-                direction = "up";
-                update();
-            } else if (worldX < gp.tileSize * 31) {
-                direction = "right";
-                update();
-            }
-        }
-        if (InPath == 3) {
-            if (worldY > gp.tileSize * 30 - 40) {
-                direction = "up";
-                update();
-            } else if (worldX < gp.tileSize * 43) {
-                direction = "right";
-                update();
-            } else if (worldY > gp.tileSize * 28 - 40) {
-                direction = "up";
-                update();
-            } else if (worldX < gp.tileSize * 47) {
-                direction = "right";
-                update();
-            }
-        }
-    }
-
-    private void inPathLevel3() {
-        if (InPath == 1) {
-            if (worldY > gp.tileSize * 34) {
-                direction = "up";
-                update();
-            } else if (worldX < gp.tileSize * 40) {
-                direction = "right";
-                update();
-            } else if (worldY > gp.tileSize * 25) {
-                direction = "up";
-                update();
-            }
-        }
-        if (InPath == 2) {
-            if (worldY > gp.tileSize * 34) {
-                direction = "up";
-                update();
-            } else if (worldX < gp.tileSize * 41) {
-                direction = "right";
-                update();
-            } else if (worldY > gp.tileSize * 25) {
-                direction = "up";
-                update();
-            }
-        }
-        if (InPath == 3) {
-            if (worldY > gp.tileSize * 34) {
-                direction = "up";
-                update();
-            } else if (worldX < gp.tileSize * 42) {
-                direction = "right";
-                update();
-            } else if (worldY > gp.tileSize * 25) {
-                direction = "up";
-                update();
+            case 3 -> {
+                if (InPath == 1) {
+                    if (worldY > gp.tileSize * 34) {
+                        direction = "up";
+                        update();
+                    } else if (worldX < gp.tileSize * 40) {
+                        direction = "right";
+                        update();
+                    } else if (worldY > gp.tileSize * 25) {
+                        direction = "up";
+                        update();
+                    }
+                }
+                if (InPath == 2) {
+                    if (worldY > gp.tileSize * 34) {
+                        direction = "up";
+                        update();
+                    } else if (worldX < gp.tileSize * 41) {
+                        direction = "right";
+                        update();
+                    } else if (worldY > gp.tileSize * 25) {
+                        direction = "up";
+                        update();
+                    }
+                }
+                if (InPath == 3) {
+                    if (worldY > gp.tileSize * 34) {
+                        direction = "up";
+                        update();
+                    } else if (worldX < gp.tileSize * 42) {
+                        direction = "right";
+                        update();
+                    } else if (worldY > gp.tileSize * 25) {
+                        direction = "up";
+                        update();
+                    }
+                }
             }
         }
     }
 
     public void outPath() {
         switch (gp.Current_level) {
-            case 2 ->
-                outPathLevel2();
-            case 3 ->
-                outPathLevel3();
-            default ->
-                outPathLevel1();
-        }
-    }
-
-    private void outPathLevel1() {
-        if (InPath == 1) {
-            if (worldX > 700) {
-                direction = "left";
-            } else {
-                direction = "up";
+            case 1 -> {
+                if (InPath == 1) {
+                    if (worldX > 700) {
+                        direction = "left";
+                    } else {
+                        direction = "up";
+                    }
+                    if (worldY < 20) {
+                        leftMap = true;
+                    }
+                    update();
+                }
+                if (InPath == 2) {
+                    if (worldX < 2300) {
+                        direction = "right";
+                    } else {
+                        direction = "up";
+                    }
+                    if (worldY < 20) {
+                        leftMap = true;
+                    }
+                    update();
+                }
             }
-            if (worldY < 20) {
-                leftMap = true;
+            case 2 -> {
+                if (InPath == 1 || InPath == 2 || InPath == 3) {
+                    direction = "down";
+                    if (worldY > gp.tileSize * 44) {
+                        leftMap = true;
+                    }
+                    update();
+                }
             }
-            update();
-        }
-        if (InPath == 2) {
-            if (worldX < 2300) {
-                direction = "right";
-            } else {
-                direction = "up";
+            case 3 -> {
+                if (InPath == 1 || InPath == 2 || InPath == 3) {
+                    direction = "up";
+                    if (worldY < gp.tileSize) {
+                        leftMap = true;
+                    }
+                    update();
+                }
             }
-            if (worldY < 20) {
-                leftMap = true;
-            }
-            update();
-        }
-    }
-
-    private void outPathLevel2() {
-        if (InPath == 1 || InPath == 2 || InPath == 3) {
-            direction = "down";
-            if (worldY > gp.tileSize * 44) {
-                leftMap = true;
-            }
-            update();
-        }
-    }
-
-    private void outPathLevel3() {
-        if (InPath == 1 || InPath == 2 || InPath == 3) {
-            direction = "up";
-            if (worldY < gp.tileSize) {
-                leftMap = true;
-            }
-            update();
         }
     }
 
@@ -282,7 +264,7 @@ public class Customer extends Entity {
      * to a still image to ensure a stable appearance when not moving.
      */
     public void update() {
-        // Logic to update the customer's position and behavior goes here
+        // Customer update porstion and animation
         isMoving = false;
         animationThreshold = 12; // Normal animation speed
 
@@ -291,7 +273,7 @@ public class Customer extends Entity {
         gp.cChecker.customerCheckTile(this); // Check for collisions with tiles
         gp.cChecker.checkEntityCollision(this, gp.customers); // Check for collisions with other customers
 
-        // Check world boundary — stop the player when the edge of the map would come into view
+        // Check world boundary and stop the player when the edge of the map would come into view
         if (direction.equals("up") && worldY <= 0) {
             collisionOn = true;
             SpriteCounter = 0;
@@ -314,22 +296,22 @@ public class Customer extends Entity {
             isMoving = true;
             switch (direction) {
                 case "up" -> {
-                    worldY -= speed; // Update worldX to reflect the customer's movement in the world
+                    worldY -= speed;
                     isMoving = true;
                     break;
                 }
                 case "down" -> {
-                    worldY += speed; // Update worldY to reflect the customer's movement in the world
+                    worldY += speed;
                     isMoving = true;
                     break;
                 }
                 case "left" -> {
-                    worldX -= speed; // Update worldX to reflect the customer's movement in the world
+                    worldX -= speed;
                     isMoving = true;
                     break;
                 }
                 case "right" -> {
-                    worldX += speed; // Update worldX to reflect the customer's movement in the world
+                    worldX += speed;
                     isMoving = true;
                     break;
                 }

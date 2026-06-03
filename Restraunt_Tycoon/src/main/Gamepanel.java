@@ -32,7 +32,14 @@ public class Gamepanel extends JPanel implements Runnable {
     public int customersIndex = 0;
     private long lastCustomerSpawnTime = System.currentTimeMillis();
     private long customerSpawnInterval = 15000; // 15 seconds in milliseconds
-    private int maxCustomers;
+    private int maxCustomers; // Changes up based on level
+
+    // Car array
+    public Car[] cars;
+    public int carsIndex = 0;
+    private long lastCarSpawnTime = System.currentTimeMillis();
+    private final long carSpawnInterval = 30000; // Spawn a car every 30 seconds in level 3
+    private final int maxCars = 4; // Max cars in level 4
 
     // World settings
     public final int maxWorldCol = 60;
@@ -47,8 +54,9 @@ public class Gamepanel extends JPanel implements Runnable {
 
     // Tracks which stall the player is currently inside
     public String currentStallType = "";
+    // No need for turck, there is only 1 type for cooking
 
-    // One-shot Used flags so held keys don't repeat actions
+    // One-shot used flags so held keys don't repeat actions
     private boolean toggleUsed = false;
     private boolean InventoryUsed = false;
     private boolean infoUsed = false;
@@ -62,6 +70,7 @@ public class Gamepanel extends JPanel implements Runnable {
     private int lastDigitUsed = -1;
 
     Thread gameThread; // Thread to run the game loop
+    // Instances of other classes
     public TileManager tileM = new TileManager(this);
     public KeyHandler keyH = new KeyHandler();
     public CollisionChecker cChecker = new CollisionChecker(this);
@@ -73,11 +82,6 @@ public class Gamepanel extends JPanel implements Runnable {
     public InformationPanel informationPanel = new InformationPanel();
     public Messages messages;
     public boolean level3RestockZone = false;
-    public Car[] cars;
-    public int carsIndex = 0;
-    private long lastCarSpawnTime = System.currentTimeMillis();
-    private final long carSpawnInterval = 30000; // Spawn a car every 30 seconds in level 3
-    private final int maxCars = 3; // Max cars in level 3
 
     public Gamepanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -88,7 +92,7 @@ public class Gamepanel extends JPanel implements Runnable {
         this.setFocusTraversalKeysEnabled(false);
         this.messages = new Messages("");
 
-        // Initialize max customers based on current level and create initial customers array
+        // Changes some part based on level
         LevelChanges();
         if (Current_level == 1) {
             customers = new Customer[maxCustomers];
@@ -101,13 +105,16 @@ public class Gamepanel extends JPanel implements Runnable {
             case 1 -> {
                 maxCustomers = 8;
                 customerSpawnInterval = 15000;
-            } case 2 ->{
+            }
+            case 2 -> {
                 maxCustomers = 12;
                 customerSpawnInterval = 12500;
-            }case 3 -> {
+            }
+            case 3 -> {
                 maxCustomers = 15;
                 customerSpawnInterval = 10000;
-            } default -> {
+            }
+            default -> {
                 maxCustomers = 8;
                 customerSpawnInterval = 15000;
             }
@@ -140,6 +147,10 @@ public class Gamepanel extends JPanel implements Runnable {
     public void update() {
         player.update();
         messages.update();
+        updateInventoryPanel();
+        updateInformationPanel();
+        updateLevel();
+        updateOrderBoard();
 
         if (Current_level == 3) {
             Rectangle zone = new Rectangle(33 * tileSize, 17 * tileSize, 4 * tileSize, 4 * tileSize);
@@ -148,15 +159,11 @@ public class Gamepanel extends JPanel implements Runnable {
             restockPanel.visible = level3RestockZone;
         }
 
-        updateInventoryPanel();
-        updateInformationPanel();
-        updateLevel();
         if (gameState.equals(STALL_STATE)) {
             if (currentStallType.equals("Green")) {
                 updateRestockPanel();
             }
         }
-        updateOrderBoard();
 
         if (Current_level == 3 && level3RestockZone) {
             updateRestockPanel();
@@ -203,11 +210,10 @@ public class Gamepanel extends JPanel implements Runnable {
                     continue;
                 }
             }
-            // Always check stall contact each frame even if the customer isn't moving
+            // Check stall contact each frame even if the customer isn't moving
             cChecker.customerCheckTile(customer);
 
-            // Level 3: detect customers standing on the special 3x3 rect and
-            // place a level-3 order for them once.
+            // ONly level 3, detect customers standing on the special 3x3 rect and place a level-3 order for them once.
             if (Current_level == 3) {
                 int rectX = 40 * tileSize;
                 int rectY = 25 * tileSize;
@@ -326,7 +332,7 @@ public class Gamepanel extends JPanel implements Runnable {
                 }
             }
 
-            // Place the order once the car arrives on the grey 4x4 zone.
+            // Place the order once the car arrives on the 4x4 zone.
             int rectX = tileSize * 35;
             int rectY = tileSize * 37;
             int rectH = tileSize * 4;
@@ -368,6 +374,7 @@ public class Gamepanel extends JPanel implements Runnable {
     }
 
     public int countCustomersOutsideStall(String stallType) {
+        // Checks if customer is in contact with stall and counts them
         int count = 0;
         for (int i = 0; i < customersIndex; i++) {
             Customer customer = customers[i];
@@ -383,6 +390,7 @@ public class Gamepanel extends JPanel implements Runnable {
     }
 
     public int countCustomerOutsideTruck(String truckType) {
+        // Checks if customer is in contact with stall and counts them
         int count = 0;
         for (int i = 0; i < customersIndex; i++) {
             Customer customer = customers[i];
@@ -507,7 +515,7 @@ public class Gamepanel extends JPanel implements Runnable {
 
     @SuppressWarnings("static-access")
     private void updateRestockPanel() {
-        // toggle restock panel visibility
+        // Toggle restock panel visibility
         if (keyH.toggleOrdersPressed && !toggleUsed) {
             restockPanel.visible = !restockPanel.visible;
             toggleUsed = true;
@@ -580,7 +588,7 @@ public class Gamepanel extends JPanel implements Runnable {
     private void updateInventoryPanel() {
         // toggle inventory panel visibility
         if (keyH.toggleInventoryPressed && !InventoryUsed) {
-            inventoryPanel.toggle();
+            inventoryPanel.visible();
             InventoryUsed = true;
         }
         if (!keyH.toggleInventoryPressed) {

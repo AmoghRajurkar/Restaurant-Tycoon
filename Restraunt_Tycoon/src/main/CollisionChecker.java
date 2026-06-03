@@ -10,7 +10,7 @@ public class CollisionChecker {
     public static String lastContactStall = "";
     public static String contactTruck = "";
     public static String lastContactTruck = "";
-    public static String lastStation = ""; // Used to track the last station to cook
+    public static String lastStation = "";
 
     /**
      * Constructor for CollisionChecker, used in Gameplanel to check for
@@ -96,8 +96,8 @@ public class CollisionChecker {
                     }
                 }
             }
-        } else if (gp.Current_level >= 2) {
-            // Check collision with truck tiles in level 2 and 3
+        } else if (gp.Current_level == 2) {
+            // Check collision with truck tiles in level 2
             switch (entity.direction) {
                 case "up" -> {
                     buildingTopRow = (entityTopWorldY - entity.speed) / gp.stallTileSize;
@@ -138,7 +138,7 @@ public class CollisionChecker {
             }
         }
 
-        // Checks collision with world tiles
+        // Checks collision with world tiles in any level
         switch (entity.direction) {
             case "up" -> {
                 entityTopRow = (entityTopWorldY - entity.speed) / gp.tileSize;
@@ -174,8 +174,7 @@ public class CollisionChecker {
             }
         }
 
-        // If playing level 3, some station tiles exist in the world layer (worldmap3).
-        // Detect contact with those station tiles and trigger cooking just like interior stations.
+        // If playing level 3, station tiles exist in the world layer. Detect contact with those station tiles and trigger cooking just like interior stations.
         if (gp.Current_level == 3) {
             boolean stationFound = false;
             int wtile1, wtile2;
@@ -259,6 +258,7 @@ public class CollisionChecker {
 
         int leftCol, rightCol, topRow, bottomRow;
 
+        // Collision detection inside stall and trucks with stations.
         switch (direction) {
             case "up" -> {
                 topRow = (top - speed) / gp.tileSize;
@@ -318,16 +318,9 @@ public class CollisionChecker {
             }
         }
 
-        // No collision — clear the last printed name so walking away and back prints again
+        // No collision, clear the last station
         lastStation = "";
         return false;
-    }
-
-    /**
-     * Wrapper method for backward compatibility. Calls checkInteriorTile.
-     */
-    public boolean checkStallTile(int roomX, int roomY, String direction, int speed) {
-        return checkInteriorTile(roomX, roomY, direction, speed);
     }
 
     /**
@@ -593,8 +586,7 @@ public class CollisionChecker {
      * @param targets
      */
     public void checkEntityCollision(Entity entity, Entity[] targets) {
-        // Check for collisions between entities based on the entity's next move,
-        // so already-touching customers can still move away instead of freezing.
+        // Check for collisions between entities based on the entity's next move, so already-touching customers can still move away instead of freezing.
         if (targets == null) {
             return;
         }

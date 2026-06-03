@@ -6,14 +6,14 @@ import java.awt.event.KeyListener;
 public class KeyHandler implements KeyListener {
 
     public boolean upPressed, downPressed, leftPressed, rightPressed, boostPressed;
-    public boolean upArrow, downArrow; // arrow keys only — used to navigate the restock list
+    public boolean upArrow, downArrow; // arrow keys only
     public boolean interactPressed; // E — enter/exit stalls
     public boolean toggleOrdersPressed; // Tab — show/hide order/restock board
     public boolean toggleInventoryPressed; // Q - show/hide inventory
     public boolean toggleInfoPressed; // 1 - show/hide information panel
     public boolean enterPressed; // Enter — select item or confirm quantity
     public boolean backspacePressed; // Backspace — delete last digit
-    public boolean fulfillPressed; // 2 — send order (red/blue)
+    public boolean fulfillPressed; // 2 — send cooked food
     public boolean UpgradeCookPressed; // U - upgrade cooking level
     public boolean SpacePressed; // Space - next level
 
@@ -31,7 +31,7 @@ public class KeyHandler implements KeyListener {
     public void keyPressed(KeyEvent e) {
         int code = e.getKeyCode();
 
-        // WASD moves the player — blocked while typing and cooking
+        // WASD moves the player is blocked while typing and cooking
         if (!typingMode && !Cook.cooking) {
             if (code == KeyEvent.VK_W) {
                 upPressed = true;

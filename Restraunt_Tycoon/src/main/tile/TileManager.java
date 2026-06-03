@@ -23,7 +23,7 @@ public class TileManager {
     int truckMapRow;
     private String lastHandledTruck = "";
 
-    // Interior map dimensions — 20 cols x 15 rows, fits the screen perfectly
+    // Interior map dimensions — 20 cols x 15 rows
     private final int interiorCols = 20;
     private final int interiorRows = 15;
 
@@ -37,7 +37,7 @@ public class TileManager {
     // Points to whichever stall the player just entered
     private int[][] currentStallMap = null;
 
-    // Door position — bottom-right corner, one tileSize away from each wall
+    // Door position
     public int doorX;
     public int doorY;
 
@@ -66,7 +66,7 @@ public class TileManager {
                 loadWorldMap("/res/maps/worldmap1.txt");
                 loadStallsInWorld("/res/maps/stalls.txt");
 
-                // Preload all three stall interiors so entering is instant
+                // Preload all the stall interiors so entering is instant
                 loadInteriorMap("red_stall.txt", redStallMap);
                 loadInteriorMap("blue_stall.txt", blueStallMap);
                 loadInteriorMap("green_stall.txt", greenStallMap);
@@ -76,7 +76,7 @@ public class TileManager {
                 loadWorldMap("/res/maps/worldmap2.txt");
                 loadTrucksInWorld("/res/maps/trucks.txt");
 
-                // Preload truck interiors so entering is instant
+                // Preload all the truck interiors so entering is instant
                 loadInteriorMap("red_truck", redtruckMap);
                 loadInteriorMap("green_truck", greentruckMap);
             }
@@ -489,8 +489,7 @@ public class TileManager {
     public void loadInterior() {
         if (gp.Current_level == 1) {
             loadStallInterior();
-        } else if (gp.Current_level >= 2) {
-            // Level 2 and 3 both use truck interiors
+        } else if (gp.Current_level == 2) {
             loadTruckInterior();
         }
     }
@@ -678,7 +677,7 @@ public class TileManager {
                 break;
             }
             case 3 -> {
-                // Level 3 has no trucks - do nothing
+                // Level 3 has nothing
             }
         }
     }
