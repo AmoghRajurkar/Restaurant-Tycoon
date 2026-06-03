@@ -16,29 +16,42 @@ public class Messages {
     public boolean visible = false;
     public static String message;
     private long messageStartTime = 0;
-
+    /**
+     * Initializes the messages panel with the given message.
+     * @param Message The message to display.
+     */
     @SuppressWarnings("static-access")
     public Messages(String Message) {
         this.message = Message;
     }
-
+    /**
+     * Shows the specified message for a limited duration.
+     * @param msg The message to display.
+     */
     @SuppressWarnings("static-access")
     public void showMessageForDuration(String msg) {
         this.message = msg;
         this.visible = true;
         this.messageStartTime = System.currentTimeMillis();
     }
-
+    /**
+     * Updates the visibility of the message based on its duration.
+     */
     public void update() {
         if (visible && System.currentTimeMillis() - messageStartTime >= DURATION) {
             visible = false;
         }
     }
-
+    **
+     * Toggles the visibility of the message panel.
+     */
     public void toggleVisible() {
         visible = !visible;
     }
-
+    /**
+     * Draws the message panel on the screen if it is visible.
+     * @param g2 The Graphics2D object for drawing.
+     */
     public void showMessage(Graphics2D g2) {
         if (!visible) {
             return;
