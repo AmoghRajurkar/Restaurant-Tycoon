@@ -18,7 +18,7 @@ public class Entity {
     public int SpriteNum = 1; // Variable to track which sprite image to use for animation
     public Rectangle solidArea; // Rectangle representing the solid area of the entity for collision detection
     public boolean collisionOn = false; // Flag to indicate whether a collision is currently occurring for the entity
-    /*
+    /**
      * Constructor for the Entity class, initializes the entity's position and direction.
      * @param gp The Gamepanel instance for accessing game properties and methods.
      */
