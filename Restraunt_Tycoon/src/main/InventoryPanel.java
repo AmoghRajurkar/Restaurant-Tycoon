@@ -20,12 +20,18 @@ public class InventoryPanel {
     public boolean visible = false;
     private int selectedIndex = 0; // Currently highlighted item in the list
     private int scrollOffset = 0; // Top item index visible in the list
-
+    /**
+     * Initializes the inventory panel with the given inventory.
+     * @param inventory The inventory to display.
+     */
     public InventoryPanel(Inventory inventory) {
         this.inventory = inventory;
     }
 
-    // Move selection up/down through the inventory items
+    /**
+     * Moves the selection up or down through the inventory items.
+     * @param dir The direction to move (negative for up, positive for down).
+     */
     public void moveSelection(int dir) {
         int totalItems = Inventory.INVENTORY.length;
         selectedIndex = (selectedIndex + dir + totalItems) % totalItems;
@@ -38,7 +44,9 @@ public class InventoryPanel {
         }
     }
 
-    // Toggle visibility
+    /**
+     * Toggles the visibility of the inventory panel.
+     */
     public void visible() {
         visible = !visible;
         if (visible) {
@@ -47,6 +55,10 @@ public class InventoryPanel {
         }
     }
 
+    /**
+     * Draws the inventory panel on the screen.
+     * @param g2 The Graphics2D object for drawing.
+     */
     @SuppressWarnings("static-access")
     public void draw(Graphics2D g2) {
         if (!visible) {
