@@ -31,7 +31,7 @@ public class Gamepanel extends JPanel implements Runnable {
     public Customer[] customers;
     public int customersIndex = 0;
     private long lastCustomerSpawnTime = System.currentTimeMillis();
-    private final long customerSpawnInterval = 15000; // 15 seconds in milliseconds
+    private long customerSpawnInterval = 15000; // 15 seconds in milliseconds
     private int maxCustomers;
 
     // World settings
@@ -76,7 +76,7 @@ public class Gamepanel extends JPanel implements Runnable {
     public Car[] cars;
     public int carsIndex = 0;
     private long lastCarSpawnTime = System.currentTimeMillis();
-    private final long carSpawnInterval = 3000; // Spawn a car every 30 seconds in level 3
+    private final long carSpawnInterval = 30000; // Spawn a car every 30 seconds in level 3
     private final int maxCars = 3; // Max cars in level 3
 
     public Gamepanel() {
@@ -89,26 +89,28 @@ public class Gamepanel extends JPanel implements Runnable {
         this.messages = new Messages("");
 
         // Initialize max customers based on current level and create initial customers array
-        setMaxCustomersForLevel();
+        LevelChanges();
         if (Current_level == 1) {
             customers = new Customer[maxCustomers];
             spawnCustomer();
         }
     }
 
-    /**
-     * Set `maxCustomers` according to the current level.
-     */
-    private void setMaxCustomersForLevel() {
+    private void LevelChanges() {
         switch (Current_level) {
-            case 1 ->
+            case 1 -> {
                 maxCustomers = 8;
-            case 2 ->
+                customerSpawnInterval = 15000;
+            } case 2 ->{
                 maxCustomers = 12;
-            case 3 ->
+                customerSpawnInterval = 12500;
+            }case 3 -> {
                 maxCustomers = 15;
-            default ->
+                customerSpawnInterval = 10000;
+            } default -> {
                 maxCustomers = 8;
+                customerSpawnInterval = 15000;
+            }
         }
     }
 
@@ -221,12 +223,36 @@ public class Gamepanel extends JPanel implements Runnable {
                 );
 
                 if (rect.intersects(customerArea) && !customer.place_order && !customer.isServed) {
-                    orderBoard.customers.add(new OrderList(3, "Red"));
+                    OrderList order = new OrderList(3, "Red");
+                    customer.order = order;
+                    orderBoard.customers.add(order);
                     orderBoard.visible = true;
                     customer.place_order = true;
                 }
             }
         }
+    }
+
+    public Customer getCustomerForOrder(OrderList order) {
+        for (Customer customer : customers) {
+            if (customer != null && customer.order == order) {
+                return customer;
+            }
+        }
+        return null;
+    }
+
+    public Car getCarForOrder(OrderList order) {
+        if (cars == null) {
+            return null;
+        }
+        for (Car car : cars) {
+            if (car != null && car.order == order) {
+                return car;
+            }
+        }
+
+        return null;
     }
 
     private void spawnCustomer() {
@@ -313,7 +339,9 @@ public class Gamepanel extends JPanel implements Runnable {
                     car.solidArea.height
             );
             if (rect.intersects(carArea) && !car.place_order && !car.isServed) {
-                orderBoard.cars.add(new OrderList(3, "Red"));
+                OrderList order = new OrderList(3, "Red");
+                car.order = order;
+                orderBoard.cars.add(order);
                 orderBoard.visible = true;
                 car.place_order = true;
             }
@@ -418,7 +446,7 @@ public class Gamepanel extends JPanel implements Runnable {
         if (keyH.SpacePressed && !SpaceUsed) {
             if (Current_level == 1 && gameState.equals(WORLD_STATE) && Inventory.playerMoney >= 1000) {
                 Current_level = 2;
-                setMaxCustomersForLevel();
+                LevelChanges();
                 tileM.reloadLevelMap();
                 // Reset player position and state for level 2
                 player.worldX = tileSize * 15;
@@ -434,7 +462,7 @@ public class Gamepanel extends JPanel implements Runnable {
                 carsIndex = 0;
             } else if (Current_level == 2 && Inventory.playerMoney >= 2500) {
                 Current_level = 3;
-                setMaxCustomersForLevel();
+                LevelChanges();
                 tileM.reloadLevelMap();
                 // Reset player position and state for level 3
                 player.worldX = tileSize * 15;

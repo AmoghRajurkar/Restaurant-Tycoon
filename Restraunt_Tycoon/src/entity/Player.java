@@ -102,11 +102,11 @@ public class Player extends Entity {
         // Upgrade cook level
         if (gp.keyH.UpgradeCookPressed && !gp.UpgradeCookUsed) {
             if (!canUpgradeCook()) {
-                gp.messages.showMessageForDuration("Not enough money to upgrade cook level!");
+                gp.messages.showMessageForDuration("Not enough money to upgrade");
                 return;
             }
             UpgradeCookLevel();
-            gp.messages.showMessageForDuration("Cook level upgraded to " + cookLevel + ", -$" + (100 * cookLevel));
+            gp.messages.showMessageForDuration("Cook Level " + cookLevel + "        Profit multiplier x" + String.format("%.2f", getMoneyMultiplier()));
             gp.inventory.takeMoneyFromPlayer(100 * cookLevel); // Pay for the upgrade
             gp.UpgradeCookUsed = true;
         }
@@ -298,7 +298,7 @@ public class Player extends Entity {
             int waitingCustomers = gp.countCustomerOutsideTruck(CollisionChecker.lastContactTruck);
             if (waitingCustomers > 0) {
                 for (int i = 0; i < waitingCustomers; i++) {
-                    gp.orderBoard.customers.add(new OrderList(1, CollisionChecker.lastContactTruck));
+                    gp.orderBoard.customers.add(new OrderList(2, CollisionChecker.lastContactTruck));
                 }
             }
         }
@@ -412,6 +412,10 @@ public class Player extends Entity {
      */
     public void UpgradeCookLevel() {
         cookLevel++;
+    }
+
+    public double getMoneyMultiplier() {
+        return cookLevel;
     }
 
     /**

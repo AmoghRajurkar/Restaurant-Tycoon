@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Random;
 import javax.imageio.ImageIO;
 import main.Gamepanel;
+import main.OrderList;
 
 public class Customer extends Entity {
 
@@ -22,6 +23,7 @@ public class Customer extends Entity {
     public boolean isServed = false; // Flag to indicate whether the customer has been served or not
     public boolean place_order = false; // True once we've placed a level 3 order for this customer
     public boolean leftMap = false; // Flag to indicate whether the customer has left the map or not
+    public OrderList order;
 
     /**
      * Constructor for the Customer class, which initializes the customer's

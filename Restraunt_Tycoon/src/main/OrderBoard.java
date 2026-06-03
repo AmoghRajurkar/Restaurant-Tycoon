@@ -57,7 +57,6 @@ public class OrderBoard {
      */
     @SuppressWarnings("static-access")
     public void fulfillFirst() {
-
         if (gp.Current_level == 3) {
             if (customers.isEmpty() && cars.isEmpty()) {
                 gp.messages.showMessageForDuration("No customers waiting.");
@@ -68,15 +67,18 @@ public class OrderBoard {
             for (int customerIndex = 0; customerIndex < customers.size(); customerIndex++) {
                 OrderList order = customers.get(customerIndex);
                 if (order.items.isEmpty()) {
+                    Customer servedCustomer = null;
+                    for (Customer customer : gp.customers) {
+                        if (customer != null && customer.order == order) {
+                            servedCustomer = customer;
+                            break;
+                        }
+                    }
+
+                    if (servedCustomer != null) {
+                        servedCustomer.isServed = true;
+                    }
                     customers.remove(customerIndex);
-                    Customer servedCustomer = gp.getFirstWaitingCustomerStall(gp.currentStallType);
-                    if (servedCustomer != null) {
-                        servedCustomer.isServed = true;
-                    }
-                    servedCustomer = gp.getFirstWaitingCustomerTruck(gp.currentStallType);
-                    if (servedCustomer != null) {
-                        servedCustomer.isServed = true;
-                    }
                     customerIndex--;
                     continue;
                 }
@@ -91,25 +93,29 @@ public class OrderBoard {
                     if (gp.inventory.playerItems[invIndex] <= 0) {
                         continue;
                     }
-                    // Serve exactly ONE item
                     gp.inventory.playerItems[invIndex]--;
+
                     int qty = Integer.parseInt(orderItem[1]) - 1;
                     if (qty <= 0) {
                         order.items.remove(itemIndex);
                     } else {
                         orderItem[1] = String.valueOf(qty);
                     }
-                    gp.inventory.giveMoneyToPlayer(Cook.price);
+                    double payout = getItemPrice(itemName) * gp.player.getMoneyMultiplier();
+                    gp.inventory.giveMoneyToPlayer(payout);
+
                     if (order.items.isEmpty()) {
+                        Customer servedCustomer = null;
+                        for (Customer customer : gp.customers) {
+                            if (customer != null && customer.order == order) {
+                                servedCustomer = customer;
+                                break;
+                            }
+                        }
+                        if (servedCustomer != null) {
+                            servedCustomer.isServed = true;
+                        }
                         customers.remove(customerIndex);
-                        Customer servedCustomer = gp.getFirstWaitingCustomerStall(gp.currentStallType);
-                        if (servedCustomer != null) {
-                            servedCustomer.isServed = true;
-                        }
-                        servedCustomer = gp.getFirstWaitingCustomerTruck(gp.currentStallType);
-                        if (servedCustomer != null) {
-                            servedCustomer.isServed = true;
-                        }
                     }
                     return;
                 }
@@ -119,14 +125,21 @@ public class OrderBoard {
             for (int carIndex = 0; carIndex < cars.size(); carIndex++) {
                 OrderList order = cars.get(carIndex);
                 if (order.items.isEmpty()) {
-                    cars.remove(carIndex);
-                    Car servedCar = gp.getFirstWaitingCar();
+                    Car servedCar = null;
+                    for (Car car : gp.cars) {
+                        if (car != null && car.order == order) {
+                            servedCar = car;
+                            break;
+                        }
+                    }
                     if (servedCar != null) {
                         servedCar.isServed = true;
                     }
+                    cars.remove(carIndex);
                     carIndex--;
                     continue;
                 }
+
                 for (int itemIndex = 0; itemIndex < order.items.size(); itemIndex++) {
                     String[] orderItem = order.items.get(itemIndex);
                     String itemName = orderItem[0];
@@ -137,7 +150,6 @@ public class OrderBoard {
                     if (gp.inventory.playerItems[invIndex] <= 0) {
                         continue;
                     }
-                    // Serve exactly ONE item
                     gp.inventory.playerItems[invIndex]--;
 
                     int qty = Integer.parseInt(orderItem[1]) - 1;
@@ -146,24 +158,30 @@ public class OrderBoard {
                     } else {
                         orderItem[1] = String.valueOf(qty);
                     }
-                    gp.inventory.giveMoneyToPlayer(Cook.price);
+                    double payout = getItemPrice(itemName) * gp.player.getMoneyMultiplier();
+                    gp.inventory.giveMoneyToPlayer(payout);
+
                     if (order.items.isEmpty()) {
-                        cars.remove(carIndex);
-                        Car servedCar = gp.getFirstWaitingCar();
+                        Car servedCar = null;
+                        for (Car car : gp.cars) {
+                            if (car != null && car.order == order) {
+                                servedCar = car;
+                                break;
+                            }
+                        }
                         if (servedCar != null) {
                             servedCar.isServed = true;
                         }
+                        cars.remove(carIndex);
                     }
                     return;
                 }
             }
-
             gp.messages.showMessageForDuration(
                     "No available items in inventory to serve any customer.");
             return;
         }
 
-        // NORMAL LEVELS
         if (customers.isEmpty()) {
             gp.messages.showMessageForDuration("No customers waiting.");
             return;
@@ -172,17 +190,19 @@ public class OrderBoard {
         for (int customerIndex = 0; customerIndex < customers.size(); customerIndex++) {
             OrderList order = customers.get(customerIndex);
             if (order.items.isEmpty()) {
-                customers.remove(customerIndex);
-                customerIndex--;
-                Customer servedCustomer = gp.getFirstWaitingCustomerStall(gp.currentStallType);
-                if (servedCustomer != null) {
-                    servedCustomer.isServed = true;
+                Customer servedCustomer = null;
+                for (Customer customer : gp.customers) {
+                    if (customer != null && customer.order == order) {
+                        servedCustomer = customer;
+                        break;
+                    }
                 }
 
-                servedCustomer = gp.getFirstWaitingCustomerTruck(gp.currentStallType);
                 if (servedCustomer != null) {
                     servedCustomer.isServed = true;
                 }
+                customers.remove(customerIndex);
+                customerIndex--;
                 continue;
             }
 
@@ -194,32 +214,58 @@ public class OrderBoard {
                     continue;
                 }
                 gp.inventory.playerItems[invIndex]--;
-                int qty = Integer.parseInt(orderItem[1]) - 1;
 
+                int qty = Integer.parseInt(orderItem[1]) - 1;
                 if (qty <= 0) {
                     order.items.remove(itemIndex);
                 } else {
                     orderItem[1] = String.valueOf(qty);
                 }
-                gp.inventory.giveMoneyToPlayer(Cook.price);
+                double payout = getItemPrice(itemName) * gp.player.getMoneyMultiplier();
+                gp.inventory.giveMoneyToPlayer(payout);
 
                 if (order.items.isEmpty()) {
+                    Customer servedCustomer = null;
+                    for (Customer customer : gp.customers) {
+                        if (customer != null && customer.order == order) {
+                            servedCustomer = customer;
+                            break;
+                        }
+                    }
+
+                    if (servedCustomer != null) {
+                        servedCustomer.isServed = true;
+                    }
                     customers.remove(customerIndex);
-                    Customer servedCustomer = gp.getFirstWaitingCustomerStall(gp.currentStallType);
-                    if (servedCustomer != null) {
-                        servedCustomer.isServed = true;
-                    }
-                    servedCustomer = gp.getFirstWaitingCustomerTruck(gp.currentStallType);
-                    if (servedCustomer != null) {
-                        servedCustomer.isServed = true;
-                    }
                 }
                 return;
             }
         }
-
         gp.messages.showMessageForDuration(
                 "No available items in inventory to serve any customer.");
+    }
+
+    private int getItemPrice(String itemName) {
+        return switch (itemName) {
+            case "Burger" ->
+                20;
+            case "Fries" ->
+                15;
+            case "MilkShake" ->
+                25;
+            case "IceCream" ->
+                15;
+            case "Popcorn" ->
+                10;
+            case "Soda" ->
+                12;
+            case "Coffee" ->
+                18;
+            case "Omelet" ->
+                20;
+            default ->
+                0;
+        };
     }
 
     /**

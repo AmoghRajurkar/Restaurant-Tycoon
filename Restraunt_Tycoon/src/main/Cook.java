@@ -148,4 +148,6 @@ public class Cook {
 
         return hasIngredient1 && hasIngredient2;
     }
+
+
 }
