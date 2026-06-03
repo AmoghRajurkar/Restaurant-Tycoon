@@ -26,12 +26,18 @@ public class RestockPanel {
     private int scrollOffset = 0; // first visible row in the list
     private String typedQty = ""; // digits the player has typed so far
     public boolean typingMode = false; // true while the quantity box is active
-
+    /**
+     * Initializes the restock panel with the given inventory.
+     * @param inventory The inventory to display.
+     */
     public RestockPanel(Inventory inventory) {
         this.inventory = inventory;
     }
 
-    // Move selection up/down through the buyable item list
+    /**
+     * Moves the selection up or down through the buyable item list.
+     * @param dir The direction to move (negative for up, positive for down).
+     */
     public void moveSelection(int dir) {
         if (typingMode) {
             return;
@@ -46,21 +52,28 @@ public class RestockPanel {
         }
     }
 
-    // Append a digit to the typed quantity, up to 4 digits long
+    /**
+     * Appends a digit to the typed quantity, up to 4 digits long.
+     * @param digit The digit to append.
+     */
     public void appendDigit(char digit) {
         if (typedQty.length() < 4) {
             typedQty += digit;
         }
     }
 
-    // Remove the last digit from the typed quantity
+    /**
+     * Deletes the last digit from the typed quantity.
+     */
     public void deleteDigit() {
         if (!typedQty.isEmpty()) {
             typedQty = typedQty.substring(0, typedQty.length() - 1);
         }
     }
 
-    // Gives the typed quantity of items from the stall to the player
+    /**
+     * Confirms the transfer of the typed quantity of items from the stall to the player.
+     */
     public void confirmTransfer() {
         if (typedQty.isEmpty()) {
             return;
@@ -100,12 +113,17 @@ public class RestockPanel {
         typingMode = false;
     }
 
-    // Activates typing mode for the currently selected item
+    /**
+     * Selects the current item and activates typing mode.
+     */
     public void selectCurrentItem() {
         typingMode = true;
         typedQty = "";
     }
-
+    /**
+     * Draws the restock panel on the screen if it is visible.
+     * @param g2 The Graphics2D object for drawing.
+     */
     @SuppressWarnings("static-access")
     public void draw(Graphics2D g2) {
         if (!visible) {
