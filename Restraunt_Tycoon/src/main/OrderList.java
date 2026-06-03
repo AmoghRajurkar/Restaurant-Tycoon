@@ -9,7 +9,11 @@ public class OrderList {
     // The first element is the item name and the second element is the quantity of that item remaining in the order
     public ArrayList<String[]> items = new ArrayList<>();
 
-    // Generate a random order list for a customer based on the current level and stall type
+    /**
+     * Initializes the order list with a random selection of items based on the current level and stall type.
+     * @param level The current level of the game.
+     * @param stall The type of stall for which to generate an order.
+     */
     public OrderList(int level, String stall) {
         Random num = new Random();
         switch (level) {
@@ -117,7 +121,10 @@ public class OrderList {
         }
     }
 
-    // Gives food, one item from the order list. Returns true if the order is completely fulfilled and can be removed from the queue
+    /**
+     * Gives food, one item from the order list. Returns true if the order is completely fulfilled and can be removed from the list.
+     * @return true if the order is completely fulfilled, false otherwise.
+     */
     public boolean giveFood() {
         if (items.isEmpty()) {
             return true;
