@@ -22,11 +22,17 @@ public class KeyHandler implements KeyListener {
 
     // Last number key typed this frame (0-9), -1 if none
     public int lastDigit = -1;
-
+    /**
+     * Handles key typed events.
+     * @param e The KeyEvent object representing the key typed event.
+     */
     @Override
     public void keyTyped(KeyEvent e) {
     }
-
+    /**
+     * Handles key pressed events, updating the state of various boolean flags based on which keys are pressed.
+     * @param e The KeyEvent object representing the key pressed event.
+     */
     @Override
     public void keyPressed(KeyEvent e) {
         int code = e.getKeyCode();
@@ -91,7 +97,10 @@ public class KeyHandler implements KeyListener {
             lastDigit = code - KeyEvent.VK_0;
         }
     }
-
+    /**
+     * Handles key released events, updating the state of various boolean flags based on which keys are released.
+     * @param e The KeyEvent object representing the key released event.
+     */
     @Override
     public void keyReleased(KeyEvent e) {
         int code = e.getKeyCode();
