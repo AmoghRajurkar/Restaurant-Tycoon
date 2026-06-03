@@ -358,7 +358,10 @@ public class OrderBoard {
             }
         }
     }
-
+    /**
+     * Draws the car orders on the screen if the order board is visible.
+     * @param g2 The Graphics2D context to draw on
+     */
     public void drawCarOrder(Graphics2D g2) {
         if (!visible || cars.isEmpty()) {
             return;
