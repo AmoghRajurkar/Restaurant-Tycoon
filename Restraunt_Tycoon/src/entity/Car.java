@@ -18,7 +18,7 @@ public class Car extends Entity {
     public boolean isServed = false;
     public boolean leftMap = false;
     public OrderList order;
-    /*
+    /**
     * Constructor for the Car class, initializes the car's position, direction, speed, and collision area.
     * @param gp The Gamepanel instance for accessing game properties and methods.
     * @param worldX The initial X coordinate of the car in the game world.
@@ -38,7 +38,7 @@ public class Car extends Entity {
         loadImage();
     }
     
-    /*
+    /**
      * Loads the image for the car from the specified file path. If the image fails to load, 
      * it prints an error message and sets the image to null.
      */
@@ -50,7 +50,7 @@ public class Car extends Entity {
             image = null;
         }
     }
-    /*
+    /**
      * Checks if the car is doing the in path behavior, which is defined as being to the right of a certain point on the map.
      */
     public void InPath() {
@@ -60,7 +60,7 @@ public class Car extends Entity {
             update();
         }
     }
-    /*
+    /**
      * Checks if the car is doing the out path behavior, which is defined as being to the left of a certain point on the map.
      */
     public void outPath() {
@@ -70,7 +70,7 @@ public class Car extends Entity {
         }
         update();
     }
-    /*
+    /**
      * Updates the car's position and checks for collisions. If a collision is detected, the car will not move.
      *If the car is moving, it will update its position based on its direction and speed. The method also checks
      *for collisions with other cars and the boundaries of the game world.
@@ -128,7 +128,7 @@ public class Car extends Entity {
             }
         }
     }
-    /*
+    /**
      * Draws the car on the screen.
      * @param g2 The Graphics2D object for drawing.
      */
