@@ -437,7 +437,10 @@ public class Player extends Entity {
     public void UpgradeCookLevel() {
         cookLevel++;
     }
-
+    /**
+     * Returns the money multiplier based on the player's cook level.
+     * @return the money multiplier as a double
+    */
     public double getMoneyMultiplier() {
         return cookLevel;
     }
