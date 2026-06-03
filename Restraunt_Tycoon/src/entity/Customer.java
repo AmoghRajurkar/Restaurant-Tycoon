@@ -204,7 +204,9 @@ public class Customer extends Entity {
             }
         }
     }
-
+    /* 
+     * Method for when the customers leave the map after being served, which determines the customer's path
+     */
     public void outPath() {
         switch (gp.Current_level) {
             case 1 -> {
