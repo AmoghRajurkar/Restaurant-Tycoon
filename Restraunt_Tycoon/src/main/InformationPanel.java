@@ -20,7 +20,9 @@ public class InformationPanel {
 
     public boolean visible = false;
     public List<String> lines = new ArrayList<>();
-
+    /**
+     * Initializes the information panel with default instructions.
+     */
     public InformationPanel() {
         // Default placeholder text until the game fills actual information
         lines.add("- WASD to move");
@@ -35,21 +37,32 @@ public class InformationPanel {
         lines.add("- Customers may stay for more food, so let it happen");
     }
 
-    // Toggle visibility
+    /**
+     * Toggles the visibility of the information panel.
+     */
     public void toggle() {
         visible = !visible;
     }
-
+    /**
+     * Sets the lines of text to be displayed in the information panel.
+     * @param newLines The list of strings to display.
+     */
     public void setLines(List<String> newLines) {
         lines.clear();
         lines.addAll(newLines);
     }
-
+    /**
+     * Sets the lines of text to be displayed in the information panel.
+     * @param newLines The array of strings to display.
+     */
     public void setLines(String... newLines) {
         lines.clear();
         Collections.addAll(lines, newLines);
     }
-
+    /**
+     * Draws the information panel on the screen.
+     * @param g2 The Graphics2D object for drawing.
+     */
     public void draw(Graphics2D g2) {
         if (!visible) {
             return;
