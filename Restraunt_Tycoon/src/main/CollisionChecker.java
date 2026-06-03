@@ -494,7 +494,15 @@ public class CollisionChecker {
 
         return "";
     }
-
+    /**
+     * Checks for collision between a customer and the truck tiles, used to check if
+     * the customer is touching the truck to decide whether to start moving towards the
+     * order board or not in level 2. It uses the same code as checkTile but returns the 
+     * truck name instead of setting a variable and doesn't check world tile collisions 
+     * since it's only used for customers who don't interact with those.
+     * @param entity
+     * @return
+     */
     public String getCustomerContactTruck(Entity entity) {
         // Same code from checkTile but returns the truck name instead of setting a variable and doesn't check world tile collisions since it's only used for customers who don't interact with those
         int entityLeftWorldX = entity.worldX + entity.solidArea.x;
