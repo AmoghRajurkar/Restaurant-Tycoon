@@ -2,6 +2,8 @@ package main;
 
 import javax.swing.*;
 
+// AI was used in parts of development ot implement some side feature and also core feature, like boost with the shift key but also customer spawning.
+// We also used it for cars, restcok panel, and some other UI elements. 
 public class Main {
 
     /**

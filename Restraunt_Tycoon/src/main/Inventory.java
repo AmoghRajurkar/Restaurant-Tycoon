@@ -9,7 +9,7 @@ public class Inventory {
 
     // Player starts with 0 of everything
     public static int[] playerItems = new int[INVENTORY.length];
-    public static double playerMoney = 10000;
+    public static double playerMoney = 300;
 
     // Green stall starts with 1000 of everything
     public static int[] restockStationItems = new int[INVENTORY.length];
@@ -22,7 +22,6 @@ public class Inventory {
     public Inventory() {
         for (int i = 0; i < INVENTORY.length; i++) {
             restockStationItems[i] = 1000;
-            playerItems[i] = 100;
         }
     }
 

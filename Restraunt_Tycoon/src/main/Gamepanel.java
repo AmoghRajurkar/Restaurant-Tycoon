@@ -788,9 +788,9 @@ public class Gamepanel extends JPanel implements Runnable {
                 g2.fillRect(sx, sy, tileSize * 4, tileSize * 4);
             }
             // Draw all customers
-            for (int i = 0; i < customers.length; i++) {
-                if (customers[i] != null) {
-                    customers[i].draw(g2);
+            for (Customer customer : customers) {
+                if (customer != null) {
+                    customer.draw(g2);
                 }
             }
             // Draw all cars in the world for level 3
